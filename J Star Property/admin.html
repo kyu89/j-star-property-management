@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14213d">
+  <meta name="description" content="J Star Property Management helps property owners and residents across the Reading and Mount Penn, Pennsylvania area.">
+  <title>Manage Listings | J Star Property Management</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('jstar-theme')||'light')}catch(e){{}}</script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="logo" href="index.html"><img src="assets/jstar_logo.webp" alt="J Star star logo"><span>J Star Property Management</span></a>
+    <button class="burger" id="menuToggle" type="button" aria-expanded="false" aria-controls="menu">☰ Menu</button>
+    <nav class="menu" id="menu" aria-label="Main navigation">
+      <a href="properties.html" data-page="properties">Properties</a>
+      <div class="dd"><a href="#" class="service-label" aria-disabled="true" tabindex="-1" onclick="return false;">Services ▾</a><div class="dd-panel"><a href="owners.html">For Owners</a><a href="residents.html">For Residents</a></div></div>
+      <a href="about.html" data-page="about">About</a>
+      <a href="contact.html" data-page="contact">Contact</a>
+      <a class="btn" href="apply.html">Apply Now</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme"><span class="theme-toggle__icon">🌙</span><span class="theme-toggle__label">Dark</span></button>
+  </div>
+</header>
+<main id="main-content">
+<section class="hero"><div class="wrap"><div class="eyebrow">Local demo tools</div><h1>Manage property listings.</h1><p>Add, edit or remove listings stored in this browser. This page is not protected by authentication and is for local testing only.</p></div></section>
+<section><div class="wrap"><div class="card"><h2 id="admin-form-title">Add a property</h2><form id="listing-form"><input type="hidden" id="listing-id"><div class="g2"><div><label for="listing-address">Street address *</label><input id="listing-address" required></div><div><label for="listing-city">City *</label><input id="listing-city" required></div><div><label for="listing-state">State</label><input id="listing-state" value="PA" maxlength="2"></div><div><label for="listing-zip">ZIP</label><input id="listing-zip"></div><div><label for="listing-rent">Rent per month ($) *</label><input id="listing-rent" type="number" min="1" required></div><div><label for="listing-type">Property type</label><select id="listing-type"></select></div><div><label for="listing-beds">Bedrooms (0 = studio)</label><input id="listing-beds" type="number" min="0" value="1"></div><div><label for="listing-baths">Bathrooms</label><input id="listing-baths" type="number" min="0" step="0.5" value="1"></div><div><label for="listing-size">Size (sq ft)</label><input id="listing-size" type="number" min="0"></div><div><label for="listing-available">Available date</label><input id="listing-available" type="date"></div><div><label for="listing-status">Status</label><select id="listing-status"><option value="available">Available</option><option value="rented">Rented (hidden from public listings)</option></select></div><div><label for="listing-photo">Photo URL (optional)</label><input id="listing-photo" type="url" placeholder="https://…"></div></div><label for="listing-description" style="margin-top:14px">Description</label><textarea id="listing-description" rows="4"></textarea><label style="display:flex;gap:10px;align-items:center;margin:14px 0"><input id="listing-featured" type="checkbox" style="width:auto">Feature on homepage</label><p class="err" id="listing-error" aria-live="polite"></p><div class="row"><button type="submit">Save listing</button><button type="button" class="outline" id="listing-cancel">Clear form</button></div></form></div><h2 style="margin-top:38px">Current listings</h2><p class="meta">Data is saved in this browser’s localStorage. It will not automatically sync to other devices or visitors.</p><div class="g3" id="admin-listings"></div></div></section>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div><a class="logo" href="index.html" style="color:#fff"><img src="assets/jstar_logo.webp" alt=""><span>J Star Property Management</span></a><p style="margin-top:14px">Responsive property management for owners and residents across the Reading area.</p></div>
+      <div><h3>Explore</h3><div class="footer-links"><a href="properties.html">Available properties</a><a href="owners.html">Owner services</a><a href="residents.html">Resident services</a><a href="about.html">About J Star</a></div></div>
+      <div><h3>Contact</h3><div class="footer-links"><a href="tel:+14848669728">(484) 866-9728</a><a href="mailto:jstarpm@gmail.com">jstarpm@gmail.com</a><span>2317 Perkiomen Avenue<br>Mount Penn, PA 19606</span></div></div>
+    </div>
+    <div class="copyright">© <span data-year></span> J Star Property Management. All rights reserved.</div>
+  </div>
+</footer>
+<div id="modal-root"></div>
+</body>
+</html>
