@@ -402,7 +402,9 @@ function initListings() {
     if (t) p.set('type', t);
     if (b) p.set('beds', b);
 
-    location.href = 'properties.html' + (p.toString() ? '?' + p : '');
+    const propertiesUrl = new URL('../sub-pages-html/properties.html', window.location.href);
+    propertiesUrl.search = p.toString();
+    location.href = propertiesUrl.toString();
   });
 }
 

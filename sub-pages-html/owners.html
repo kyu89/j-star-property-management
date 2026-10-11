@@ -6,30 +6,34 @@
   <meta name="theme-color" content="#14213d">
   <meta name="description" content="J Star Property Management helps property owners and residents across the Reading and Mount Penn, Pennsylvania area.">
   <title>For Owners | J Star Property Management</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="../J Star Property/styles.css">
   <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('jstar-theme')||'light')}catch(e){{}}</script>
-  <script src="script.js" defer></script>
+  <script src="../J Star Property/script.js" defer></script>
 </head>
 <body>
 <header>
   <div class="bar">
-    <a class="logo" href="index.html"><img src="assets/jstar_logo.webp" alt="J Star star logo"><span>J Star Property Management</span></a>
+    <a class="logo" href="../J Star Property/index.html"><img src="../J Star Property/assets/jstar_logo.webp" alt="J Star star logo"><span>J Star Property Management</span></a>
     <button class="burger" id="menuToggle" type="button" aria-expanded="false" aria-controls="menu">☰ Menu</button>
     <nav class="menu" id="menu" aria-label="Main navigation">
-      <a href="properties.html" data-page="properties">Properties</a>
-      <div class="dd"><a href="#" class="service-label" aria-disabled="true" tabindex="-1" onclick="return false;">Services ▾</a><div class="dd-panel"><a href="owners.html">For Owners</a><a href="residents.html">For Residents</a></div></div>
-      <a href="about.html" data-page="about">About</a>
-      <a href="contact.html" data-page="contact">Contact</a>
-      <a class="btn" href="apply.html">Apply Now</a>
+      <a href="../J Star Property/properties.html" data-page="properties">Properties</a>
+      <div class="dd"><a href="#" class="service-label" aria-disabled="true" tabindex="-1" onclick="return false;">Services ▾</a><div class="dd-panel"><a href="../J Star Property/owners.html">For Owners</a><a href="../J Star Property/residents.html">For Residents</a></div></div>
+      <a href="../J Star Property/about.html" data-page="about">About</a>
+      <a href="../J Star Property/contact.html" data-page="contact">Contact</a>
+      <a class="btn" href="../J Star Property/apply.html">Apply Now</a>
     </nav>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme"><span class="theme-toggle__icon">🌙</span><span class="theme-toggle__label">Dark</span></button>
   </div>
 </header>
 <main id="main-content">
-<section class="hero"><div class="wrap"><div class="eyebrow">Property owner services</div><h1>Hands-off ownership. Hands-on management.</h1><p>Protect your investment and simplify day-to-day ownership with responsive, locally focused management.</p><div class="row"><a class="btn" href="#consultation">Request a consultation</a><a class="btn outline" href="properties.html">View our properties</a></div></div></section>
+<section class="hero"><div class="wrap"><div class="eyebrow">Property owner services</div><h1>Hands-off ownership. Hands-on management.</h1><p>Protect your investment and simplify day-to-day ownership with responsive, locally focused management.</p><div class="row"><a class="btn" href="#consultation">Request a consultation</a><a class="btn outline" href="../J Star Property/properties.html">View our properties</a></div></div></section>
 <section><div class="wrap"><div class="g3"><div class="card"><div class="ic">🏷️</div><h3>Marketing & leasing</h3><p>Pricing, listing, showings and lease signing.</p></div><div class="card"><div class="ic">🔍</div><h3>Tenant screening</h3><p>Credit, income, rental history and background checks.</p></div><div class="card"><div class="ic">💵</div><h3>Rent collection</h3><p>On-time collection with consistent follow-up.</p></div><div class="card"><div class="ic">🛠️</div><h3>Maintenance</h3><p>Coordinated repairs with trusted vendors.</p></div><div class="card"><div class="ic">📊</div><h3>Financial reporting</h3><p>Regular statements showing income and expenses.</p></div><div class="card"><div class="ic">📋</div><h3>Inspections & compliance</h3><p>Move-in/out and periodic inspections.</p></div></div></div></section>
 <section class="alt"><div class="wrap"><h2>How it works</h2><div class="g3" style="margin-top:20px"><div class="card"><h3>1. Free consultation</h3><p>Tell us about your property and goals.</p></div><div class="card"><h3>2. Onboarding</h3><p>We prepare, price and market your unit.</p></div><div class="card"><h3>3. We manage</h3><p>Leasing, rent, repairs and reporting handled.</p></div></div></div></section>
-<section id="consultation"><div class="wrap" style="max-width:760px"><h2>Request a free consultation</h2><p>Tell us a little about your property. Your email app will open with the details ready to send.</p><form class="card mail-form" data-form="owner"><div class="g2"><div><label for="owner-name">Name *</label><input id="owner-name" name="name" required></div><div><label for="owner-email">Email *</label><input id="owner-email" name="email" type="email" required></div><div><label for="owner-phone">Phone</label><input id="owner-phone" name="phone" type="tel"></div><div><label for="owner-address">Property address</label><input id="owner-address" name="address"></div><div><label for="owner-units">Number of units</label><input id="owner-units" name="units" type="number" min="1"></div></div><label for="owner-message" style="margin-top:14px">Tell us about your property</label><textarea id="owner-message" name="message" rows="5"></textarea><p class="err" aria-live="polite"></p><button type="submit">Send consultation request</button></form></div></section>
+<section id="consultation"><div class="wrap" style="max-width:760px"><h2>Request a free consultation</h2><p>Tell us a little about your property. Your email app will open with the details ready to send.</p><form class="card mail-form" data-form="owner"><div class="g2"><div><label for="owner-name">Name *</label><input id="owner-name" name="name" required></div><div><label for="owner-email">Email *</label><input id="owner-email" name="email" type="email" required></div><div><label for="owner-phone">Phone</label><input id="owner-phone" name="phone" type="tel"></div><div><label for="owner-address">Property address</label><input id="owner-address" name="address"></div><<div><label for="owner-units">Number of units</label><input id="owner-units" name="units" type="number" min="1"></div></div><label for="owner-message" style="margin-top:14px">Tell us about your property</label><textarea id="owner-message" name="message" rows="5"></textarea><p class("err" aria-live]="polite"></p><button type]="submit">Send consultation request</button></form></div></section>
 </main>
 <footer>
   <div class="wrap">
