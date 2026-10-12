@@ -7,6 +7,7 @@ import {
   onAuthStateChanged, signInWithEmailAndPassword, signOut
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 import { JSTAR, $, esc, money, beds, photosOf, firstPhoto } from "../assets/js/site.js";
+import { showToast } from "../assets/js/toast.js";
 
 async function uploadImages(files) {
   const urls = [];
@@ -78,18 +79,31 @@ function initAdmin() {
     try {
       await signInWithEmailAndPassword(auth, $("#admin-email").value.trim(), $("#admin-password").value);
       loginForm.reset(); setAdminMessage("");
+      showToast("Signed in successfully.");
     } catch (err) {
-      $("#admin-login-error").textContent = "Sign-in failed. Check the email and password, and confirm Email/Password sign-in is enabled in Firebase Authentication.";
+      const message = "Sign-in failed. Check the email and password, and confirm Email/Password sign-in is enabled in Firebase Authentication.";
+      $("#admin-login-error").textContent = message;
+      showToast(message, "error");
     } finally { btn.disabled = false; }
   });
-  $("#admin-logout")?.addEventListener("click", async () => { await signOut(auth); });
+  $("#admin-logout")?.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      showToast("Signed out successfully.");
+    } catch (err) {
+      console.error("Could not sign out:", err);
+      showToast("Could not sign out. Please try again.", "error");
+    }
+  });
   onAuthStateChanged(auth, async user => {
     setSignedIn(user);
     if (!user) { adminListings = []; if ($("#admin-listings")) $("#admin-listings").innerHTML = ""; return; }
     try { await load(); }
     catch (err) {
       console.error(err);
-      setAdminMessage("Could not load listings. Check that your Firestore rules allow this signed-in administrator to read the properties collection.", true);
+      const message = "Could not load listings. Check that your Firestore rules allow this signed-in administrator to read the properties collection.";
+      setAdminMessage(message, true);
+      showToast(message, "error");
     }
   });
   $("#listing-photos")?.addEventListener("change", () => {
@@ -100,7 +114,11 @@ function initAdmin() {
   form.addEventListener("submit", async e => {
     e.preventDefault();
     const user = auth.currentUser;
-    if (!user) { setAdminMessage("Please sign in first.", true); return; }
+    if (!user) {
+      setAdminMessage("Please sign in first.", true);
+      showToast("Please sign in first.", "error");
+      return;
+    }
     const submit = $('button[type="submit"]', form);
     submit.disabled = true; setAdminMessage("Saving listing and uploading photos…");
     try {
@@ -135,9 +153,12 @@ function initAdmin() {
       if (id) await updateDoc(doc(db, JSTAR.collection, id), listing);
       else await addDoc(collection(db, JSTAR.collection), { ...listing, createdAt: serverTimestamp() });
       await load(); reset(); setAdminMessage("Listing saved successfully.");
+      showToast("Listing saved successfully.");
     } catch (err) {
       console.error(err);
-      setAdminMessage(err.message || "Could not save the listing. Check Firestore rules and Cloudinary upload settings.", true);
+      const message = err.message || "Could not save the listing. Check Firestore rules and Cloudinary upload settings.";
+      setAdminMessage(message, true);
+      showToast(message, "error");
     } finally { submit.disabled = false; }
   });
   $("#listing-cancel")?.addEventListener("click", reset);
@@ -155,8 +176,17 @@ function initAdmin() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
     if (del && confirm("Delete this property listing from Firestore?")) {
-      try { await deleteDoc(doc(db, JSTAR.collection, del.dataset.delete)); await load(); setAdminMessage("Listing deleted."); }
-      catch (err) { console.error(err); setAdminMessage("Could not delete this listing. Check Firestore rules.", true); }
+      try {
+        await deleteDoc(doc(db, JSTAR.collection, del.dataset.delete));
+        await load();
+        setAdminMessage("Listing deleted.");
+        showToast("Listing deleted.");
+      } catch (err) {
+        console.error(err);
+        const message = "Could not delete this listing. Check Firestore rules.";
+        setAdminMessage(message, true);
+        showToast(message, "error");
+      }
     }
   });
 }

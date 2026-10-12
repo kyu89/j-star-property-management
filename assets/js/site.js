@@ -1,10 +1,11 @@
 import { db } from "./firebase.js";
 import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+import { bindFormValidationToasts, showToast } from "./toast.js";
 
 "use strict";
 
 export const JSTAR = {
-  email: "jstarpm@gmail.com",
+  email: "punyeramina@gmail.com",
   phone: "(484) 866-9728",
   address: "2317 Perkiomen Avenue, Mount Penn, PA 19606",
   collection: "properties",
@@ -63,6 +64,7 @@ function applyTheme(theme) {
 }
 function initShared() {
   applyTheme(document.documentElement.dataset.theme);
+  bindFormValidationToasts();
   const toggle = $("#menuToggle"), menu = $("#menu");
   toggle?.addEventListener("click", () => {
     const open = menu.classList.toggle("open");
@@ -134,15 +136,57 @@ function initListings() {
   if (type) type.innerHTML = '<option value="">Any type</option>' + JSTAR.types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
   refreshPublicListings();
 }
-function mailto(subject, body) { location.href = `mailto:${JSTAR.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; }
+function openGmailCompose(subject, body) {
+  const params = new URLSearchParams({ view: "cm", fs: "1", to: JSTAR.email, su: subject, body });
+  const url = `https://mail.google.com/mail/?${params.toString()}`;
+  const gmailWindow = window.open(url, "_blank");
+  if (gmailWindow) {
+    gmailWindow.opener = null;
+    return;
+  }
+  location.href = url;
+}
+function formatEmailBody(title, fields) {
+  const labelWidth = Math.max(12, ...fields.map(([label]) => label.length));
+  const details = fields
+    .filter(([, value]) => String(value).trim())
+    .map(([label, value]) => {
+      const text = String(value).trim();
+      if (text.includes("\n")) {
+        return `${label.padEnd(labelWidth)}:\n${text.split(/\r?\n/).map(line => `  ${line}`).join("\n")}`;
+      }
+      return `${label.padEnd(labelWidth)}: ${text}`;
+    })
+    .join("\n\n");
+  return [
+    "J STAR PROPERTY MANAGEMENT",
+    title.toUpperCase(),
+    "-".repeat(48),
+    "",
+    details,
+    "",
+    "-".repeat(48),
+    "Submitted through the J Star Property Management website.",
+    `Phone: ${JSTAR.phone}`,
+    `Email: ${JSTAR.email}`
+  ].join("\n");
+}
+function formatFormFields(data) {
+  return Object.entries(data).map(([key, value]) => [
+    key.replace(/[_-]+/g, " ").replace(/\b\w/g, char => char.toUpperCase()),
+    value
+  ]);
+}
 function initMailForms() {
   $$(".mail-form").forEach(form => form.addEventListener("submit", e => {
     e.preventDefault(); if (!form.reportValidity()) return;
     const d = Object.fromEntries(new FormData(form).entries()), kind = form.dataset.form;
-    const subject = kind === "owner" ? `Owner consultation request - ${d.name}` : kind === "maintenance" ? `Maintenance request - ${d.name}` : `Website inquiry: ${d.subject}`;
-    const body = Object.entries(d).map(([k, v]) => `${k}: ${v}`).join("\n");
-    mailto(subject, body);
-    form.innerHTML = `<div class="ok"><strong>Your email app should have opened.</strong><br>Review the message and press Send. If it did not open, email <a href="mailto:${JSTAR.email}">${JSTAR.email}</a> or call ${JSTAR.phone}.</div>`;
+    const title = kind === "owner" ? "Owner Consultation Request" : kind === "maintenance" ? "Maintenance Request" : "Website Inquiry";
+    const subject = kind === "owner" ? `${title} - ${d.name}` : kind === "maintenance" ? `${title} - ${d.name}` : `${title}: ${d.subject}`;
+    const body = formatEmailBody(title, formatFormFields(d));
+    openGmailCompose(subject, body);
+    form.innerHTML = `<div class="ok"><strong>Gmail should have opened with your draft.</strong><br>Review the message and press Send. If Gmail does not open, email <a href="mailto:${JSTAR.email}">${JSTAR.email}</a> or call ${JSTAR.phone}.</div>`;
+    showToast("Gmail draft prepared. Review it and press Send.");
   }));
 }
 function initApplication() {
@@ -163,9 +207,13 @@ function initApplication() {
     const d = Object.fromEntries(new FormData(form).entries()), l = activeListings().find(x => x.id === select.value);
     const property = l ? `${l.address}, ${l.city}, ${l.state || "PA"}` : "Not sure yet";
     const subject = `Rental application: ${property} - ${d.first} ${d.last}`;
-    const body = `Property: ${property}\n\n` + Object.entries(d).filter(([k]) => k !== "certify").map(([k, v]) => `${k}: ${v}`).join("\n");
-    mailto(subject, body);
-    form.innerHTML = `<div class="ok"><strong>Your email app should have opened.</strong><br>Review the application and press Send. If it did not open, email <a href="mailto:${JSTAR.email}">${JSTAR.email}</a>.</div>`;
+    const body = formatEmailBody("Rental Application", [
+      ["Property", property],
+      ...formatFormFields(Object.fromEntries(Object.entries(d).filter(([key]) => key !== "certify")))
+    ]);
+    openGmailCompose(subject, body);
+    form.innerHTML = `<div class="ok"><strong>Gmail should have opened with your draft.</strong><br>Review the application and press Send. If Gmail does not open, email <a href="mailto:${JSTAR.email}">${JSTAR.email}</a>.</div>`;
+    showToast("Gmail draft prepared. Review it and press Send.");
   });
 }
 function init() {

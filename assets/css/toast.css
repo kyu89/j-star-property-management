@@ -1,0 +1,49 @@
+.toast-region {
+  position: fixed;
+  z-index: 1000;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  gap: 10px;
+  width: min(380px, calc(100vw - 36px));
+  pointer-events: none;
+}
+
+.toast {
+  padding: 14px 16px;
+  border: 1px solid #c8d3e0;
+  border-left: 4px solid #17815d;
+  border-radius: 9px;
+  background: #fff;
+  color: #172033;
+  box-shadow: 0 12px 32px rgba(20, 33, 61, .18);
+  font: 600 13px/1.45 "Manrope", "Segoe UI", Arial, sans-serif;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: opacity .2s ease, transform .2s ease;
+  cursor: pointer;
+}
+
+.toast-error {
+  border-left-color: #c0392b;
+}
+
+.toast-leaving {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+@media (max-width: 520px) {
+  .toast-region {
+    top: 10px;
+    right: 10px;
+    width: calc(100vw - 20px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
+}
