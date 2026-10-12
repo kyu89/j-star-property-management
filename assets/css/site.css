@@ -292,7 +292,7 @@ header {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("assets/jstar-hero-img.webp");
+  background-image: url("../images/jstar-hero-img.webp");
   background-position: center bottom;
   background-size: cover;
   background-repeat: no-repeat;

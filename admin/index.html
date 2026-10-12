@@ -10,13 +10,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="./admin.css">
   <script>
     try {
       document.documentElement.setAttribute("data-theme", localStorage.getItem("jstar-theme") || "light");
     } catch {}
   </script>
-  <script type="module" src="../J Star Property/script.js"></script>
+  <script type="module" src="./admin.js"></script>
 </head>
 <body class="admin-page">
   <main class="admin-login-wrap" id="admin-login-panel">
@@ -24,8 +24,8 @@
       <span class="theme-toggle__icon" aria-hidden="true"><i class="fa-solid fa-moon"></i></span>
       <span class="theme-toggle__label">Dark</span>
     </button>
-    <a class="login-brand" href="../J Star Property/index.html">
-      <img src="../J Star Property/assets/jstar_logo.webp" alt="">
+    <a class="login-brand" href="/">
+      <img src="/assets/images/jstar_logo.webp" alt="">
       <span><strong>J STAR</strong><small>PROPERTY OPERATIONS</small></span>
     </a>
     <section class="login-card" aria-labelledby="login-title">
@@ -41,15 +41,15 @@
         <p id="admin-login-error" class="form-error" aria-live="polite"></p>
         <button class="button button-primary login-submit" type="submit">Sign in to dashboard <span aria-hidden="true">→</span></button>
       </form>
-      <a class="back-link" href="../J Star Property/index.html">← Back to public website</a>
+      <a class="back-link" href="/">← Back to public website</a>
     </section>
     <p class="login-footnote">Authorized personnel only · J Star Property Management</p>
   </main>
 
   <div class="admin-layout" id="admin-editor" hidden>
     <aside class="admin-sidebar">
-      <a class="sidebar-brand" href="../J Star Property/index.html">
-        <img src="../J Star Property/assets/jstar_logo.webp" alt="">
+      <a class="sidebar-brand" href="/">
+        <img src="/assets/images/jstar_logo.webp" alt="">
         <span><strong>J STAR</strong><small>PROPERTY OPS</small></span>
       </a>
       <div class="sidebar-label">WORKSPACE</div>
@@ -59,7 +59,7 @@
         <a class="sidebar-link" href="#listing-management"><span class="nav-icon">▤</span>All listings</a>
       </nav>
       <div class="sidebar-bottom">
-        <a class="public-site-link" href="../J Star Property/index.html" target="_blank" rel="noopener">↗ View public website</a>
+        <a class="public-site-link" href="/" target="_blank" rel="noopener">↗ View public website</a>
         <div class="sidebar-note">J Star Property Management<br>Berks County, Pennsylvania</div>
       </div>
     </aside>
