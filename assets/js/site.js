@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase.js";
+import { auth, db } from "../firebase.js";
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
   query, where, orderBy, serverTimestamp
@@ -58,21 +58,25 @@ function activeListings() {
 function applyTheme(theme) {
   const dark = theme === "dark";
   document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-  const t = $("#themeToggle");
-  if (t) {
-    $(".theme-toggle__icon", t).textContent = dark ? "☀️" : "🌙";
+  $$("#themeToggle, [data-admin-theme-toggle]").forEach(t => {
+    const icon = $(".theme-toggle__icon i", t);
+    icon.classList.toggle("fa-lightbulb", dark);
+    icon.classList.toggle("fa-moon", !dark);
     $(".theme-toggle__label", t).textContent = dark ? "Light" : "Dark";
     t.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
-  }
+  });
   try { localStorage.setItem("jstar-theme", dark ? "dark" : "light"); } catch {}
 }
 function initShared() {
+  applyTheme(document.documentElement.dataset.theme);
   const toggle = $("#menuToggle"), menu = $("#menu");
   toggle?.addEventListener("click", () => {
     const open = menu.classList.toggle("open");
     toggle.setAttribute("aria-expanded", String(open));
   });
-  $("#themeToggle")?.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+  $$("#themeToggle, [data-admin-theme-toggle]").forEach(toggle => {
+    toggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+  });
   const page = (location.pathname.split("/").pop() || "index.html").replace(".html", "");
   $$("[data-page]").forEach(a => { if (a.dataset.page === page) a.classList.add("active"); });
   $$("[data-year]").forEach(e => e.textContent = new Date().getFullYear());

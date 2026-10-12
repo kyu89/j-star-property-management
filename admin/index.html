@@ -9,11 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="admin.css">
+  <script>
+    try {
+      document.documentElement.setAttribute("data-theme", localStorage.getItem("jstar-theme") || "light");
+    } catch {}
+  </script>
   <script type="module" src="../J Star Property/script.js"></script>
 </head>
 <body class="admin-page">
   <main class="admin-login-wrap" id="admin-login-panel">
+    <button type="button" class="button button-secondary admin-theme-toggle login-theme-toggle" data-admin-theme-toggle aria-label="Switch to dark theme">
+      <span class="theme-toggle__icon" aria-hidden="true"><i class="fa-solid fa-moon"></i></span>
+      <span class="theme-toggle__label">Dark</span>
+    </button>
     <a class="login-brand" href="../J Star Property/index.html">
       <img src="../J Star Property/assets/jstar_logo.webp" alt="">
       <span><strong>J STAR</strong><small>PROPERTY OPERATIONS</small></span>
@@ -60,6 +70,10 @@
         <div class="topbar-account">
           <span class="account-dot" aria-hidden="true"></span>
           <span id="admin-auth-status-signed-in">Signed in as administrator.</span>
+          <button type="button" class="button button-secondary admin-theme-toggle" data-admin-theme-toggle aria-label="Switch to dark theme">
+            <span class="theme-toggle__icon" aria-hidden="true"><i class="fa-solid fa-moon"></i></span>
+            <span class="theme-toggle__label">Dark</span>
+          </button>
           <button type="button" id="admin-logout" class="button button-quiet">Sign out</button>
         </div>
       </header>

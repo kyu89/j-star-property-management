@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#14213d">
   <meta name="description" content="J Star Property Management helps property owners and residents across the Reading and Mount Penn, Pennsylvania area.">
-  <title>Contact | J Star Property Management</title>
+  <title>Rental Application | J Star Property Management</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="../J Star Property/styles.css">
   <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('jstar-theme')||'light')}catch(e){{}}</script>
-  <script src="../J Star Property/script.js" defer></script>
+  <script type="module" src="../J Star Property/script.js"></script>
 </head>
 <body>
 <header>
@@ -30,8 +30,8 @@
   </div>
 </header>
 <main id="main-content">
-<section class="hero"><div class="wrap"><div class="eyebrow">Get in touch</div><h1>Let’s talk property.</h1><p>Have a question about management, a property, or an application? Send us a message.</p></div></section>
-<section><div class="wrap g2" style="align-items:start"><div><h2>Send us a message</h2><form class="card mail-form" data-form="contact"><div><label for="contact-name">First & last name *</label><input id="contact-name" name="name" required></div><div style="margin-top:12px"><label for="contact-email">Email *</label><input id="contact-email" name="email" type="email" required></div><div style="margin-top:12px"><label for="contact-phone">Phone</label><input id="contact-phone" name="phone" type="tel"></div><div style="margin-top:12px"><label for="contact-subject">Subject *</label><input id="contact-subject" name="subject" required></div><div style="margin-top:12px"><label for="contact-message">Comments *</label><textarea id="contact-message" name="message" rows="5" required></textarea></div><p class="err" aria-live="polite"></p><button type="submit">Prepare email</button></form></div><div class="card"><h3>J Star Property Management</h3><p>2317 Perkiomen Avenue<br>Mount Penn, PA 19606</p><p><a href="tel:+14848669728">(484) 866-9728</a></p><p><a href="mailto:jstarpm@gmail.com">jstarpm@gmail.com</a></p><a class="btn outline" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=2317+Perkiomen+Avenue+Mount+Penn+PA+19606">Open in Maps</a></div></div></section>
+<section class="hero"><div class="wrap"><div class="eyebrow">Rental application</div><h1>Tell us where you’d like to live.</h1><p>Select an available listing and provide your contact information to prepare an application email.</p></div></section>
+<section><div class="wrap" style="max-width:900px"><h2>Choose a property</h2><p>If you’re not sure yet, choose “Not sure yet” and send your details.</p><div class="card"><label for="application-property">Property</label><select id="application-property"><option value="">Loading properties…</option><option value="not-sure">Not sure yet</option></select><div id="application-property-list"></div></div><h2 style="margin-top:32px">Applicant information</h2><form class="card" id="application-form"><div class="g2"><div><label for="app-first">First name *</label><input id="app-first" name="first" required></div><div><label for="app-last">Last name *</label><input id="app-last" name="last" required></div><div><label for="app-email">Email *</label><input id="app-email" name="email" type="email" required></div><div><label for="app-phone">Phone *</label><input id="app-phone" name="phone" type="tel" required></div><div><label for="app-move">Desired move-in date</label><input id="app-move" name="move" type="date"></div><div><label for="app-occupants">Number of occupants</label><input id="app-occupants" name="occupants" type="number" min="1"></div><div><label for="app-pets">Pets</label><input id="app-pets" name="pets"></div><div><label for="app-current-address">Current address</label><input id="app-current-address" name="current address"></div><div><label for="app-landlord">Current landlord & phone</label><input id="app-landlord" name="landlord"></div><div><label for="app-employer">Employer</label><input id="app-employer" name="employer"></div><div><label for="app-income">Monthly income ($)</label><input id="app-income" name="monthly income" type="number" min="0"></div></div><label for="app-notes" style="margin-top:14px">Anything else?</label><textarea id="app-notes" name="notes" rows="4"></textarea><label style="display:flex;gap:10px;align-items:start;margin:16px 0"><input id="app-certify" type="checkbox" style="width:auto;margin-top:5px" required><span>I certify that the information I provide is true and authorize J Star to contact me about the application. *</span></label><p class="err" aria-live="polite"></p><button type="submit">Prepare application email</button><p class="meta" style="margin-top:12px">This static starter prepares an email; it does not securely submit or store a rental application online.</p></form></div></section>
 </main>
 <footer>
   <div class="wrap">
