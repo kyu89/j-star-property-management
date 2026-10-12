@@ -202,6 +202,8 @@ function initAdmin() {
     if (loginPanel) loginPanel.hidden = !!user;
     if (editor) editor.hidden = !user;
     if (status) status.textContent = user ? `Signed in as ${user.email}` : "Sign in with your administrator account to manage listings.";
+    const signedInStatus = $("#admin-auth-status-signed-in");
+    if (signedInStatus) signedInStatus.textContent = user ? `Signed in as ${user.email}` : "";
   };
   const reset = () => {
     form.reset(); $("#listing-id").value = ""; $("#listing-state").value = "PA";
@@ -212,10 +214,14 @@ function initAdmin() {
   };
   let adminListings = [];
   const render = () => {
+    $("#admin-total-count").textContent = String(adminListings.length);
+    $("#admin-available-count").textContent = String(adminListings.filter(l => l.status !== "rented" && l.published !== false).length);
+    $("#admin-rented-count").textContent = String(adminListings.filter(l => l.status === "rented" || l.published === false).length);
     $("#admin-listings").innerHTML = adminListings.map(l => {
       const photo = firstPhoto(l);
-      return `<article class="card"><div class="row" style="justify-content:space-between"><strong>${esc(l.address)}</strong>${l.status === "rented" ? '<span class="tag">RENTED</span>' : ""}</div>${photo ? `<img src="${esc(photo)}" alt="" style="width:100%;height:130px;object-fit:cover;border-radius:10px;margin:10px 0">` : ""}<p>${esc(l.city)}, ${esc(l.state || "PA")} · ${money(l.rent)}/mo</p><p class="meta">${esc(l.type)} · ${esc(beds(l))}</p><div class="row"><button class="sm" data-edit="${esc(l.id)}" type="button">Edit</button><button class="sm outline" data-delete="${esc(l.id)}" type="button">Delete</button></div></article>`;
-    }).join("") || '<div class="card"><p>No listings yet. Add your first property above.</p></div>';
+      const rented = l.status === "rented" || l.published === false;
+      return `<article class="listing-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(l.address)}</strong><span class="listing-badge${rented ? " rented" : ""}">${rented ? "RENTED" : "AVAILABLE"}</span></div>${photo ? `<img class="listing-card-photo" src="${esc(photo)}" alt="">` : ""}<p>${esc(l.city)}, ${esc(l.state || "PA")} · <strong>${money(l.rent)}/mo</strong></p><p class="meta">${esc(l.type)} · ${esc(beds(l))}</p><div class="listing-card-actions"><button class="button button-secondary" data-edit="${esc(l.id)}" type="button">Edit</button><button class="button delete-button" data-delete="${esc(l.id)}" type="button">Delete</button></div></article>`;
+    }).join("") || '<p class="empty-state">No listings yet. Add your first property above.</p>';
   };
   const load = async () => { adminListings = await getAllAdminListings(); render(); };
   loginForm?.addEventListener("submit", async e => {
