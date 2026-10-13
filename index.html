@@ -110,7 +110,7 @@
         <div class="row">
           <div class="f">
             <label for="home-q"><i class="fa-solid fa-location-dot"></i>Location</label>
-            <input id="home-q" placeholder="Reading, PA">
+            <input id="home-q" placeholder="Reading PA, 19606, apartment">
           </div>
 
           <div class="f">
@@ -133,19 +133,23 @@
           </div>
 
           <div class="f">
-            <label for="home-min-rent">Min rent/month</label>
+            <label for="home-min-rent"><i class="fa-solid fa-dollar-sign"></i>Min rent/month</label>
             <input id="home-min-rent" type="number" min="0" step="50" placeholder="Any">
           </div>
 
           <div class="f">
-            <label for="home-max-rent">Max rent/month</label>
+            <label for="home-max-rent"><i class="fa-solid fa-dollar-sign"></i>Max rent/month</label>
             <input id="home-max-rent" type="number" min="0" step="50" placeholder="Any">
           </div>
 
           <button type="button" id="home-search-btn">
             Search rentals
           </button>
+          <button type="button" id="home-clear-btn" class="outline">
+            Clear filters
+          </button>
         </div>
+        <p class="search-help">Leave any field blank to ignore that filter.</p>
       </div>
     </div>
     </section>

@@ -45,15 +45,74 @@ async function refreshPublicListings() {
     cachedListings = await getPublicListings();
     listingsReady = true;
     renderListings();
+    window.jstarOnListingsLoaded?.(true);
   } catch (err) {
     console.error("Could not load public property listings:", err);
     const target = $("#featured-listings") || $("#property-listings");
     if (target) target.innerHTML = '<div class="card"><p>Property listings could not be loaded right now. Please try again later or <a href="/pages/contact.html">contact us</a>.</p></div>';
+    window.jstarOnListingsLoaded?.(false);
   }
 }
 function activeListings() {
   return cachedListings.filter(l => l.status !== "rented" && l.published !== false)
     .sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+}
+function searchText(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/(\d),(?=\d{3}\b)/g, "$1")
+    .replace(/(\d+(?:\.\d+)?)\s*k\b/g, (_, amount) => String(Number(amount) * 1000))
+    .replace(/[^a-z0-9.]+/g, " ")
+    .trim();
+}
+function editDistanceWithinOne(left, right) {
+  if (Math.abs(left.length - right.length) > 1) return false;
+  let leftIndex = 0;
+  let rightIndex = 0;
+  let edits = 0;
+  while (leftIndex < left.length && rightIndex < right.length) {
+    if (left[leftIndex] === right[rightIndex]) {
+      leftIndex++;
+      rightIndex++;
+      continue;
+    }
+    if (++edits > 1) return false;
+    if (left.length > right.length) leftIndex++;
+    else if (right.length > left.length) rightIndex++;
+    else {
+      leftIndex++;
+      rightIndex++;
+    }
+  }
+  return edits + Number(leftIndex < left.length || rightIndex < right.length) <= 1;
+}
+function matchesSearch(listing, { query: searchQuery, type, beds: bedroomCount, minRent, maxRent }) {
+  const searchable = searchText([
+    listing.address,
+    listing.city,
+    listing.state,
+    listing.zip,
+    listing.type,
+    listing.description
+  ].join(" ")).split(/\s+/).filter(Boolean);
+  const terms = searchText(searchQuery).split(/\s+/).filter(Boolean);
+  const rentMin = Number(listing.rentMin ?? listing.rent ?? 0);
+  const rentMax = Number(listing.rentMax ?? listing.rent ?? rentMin);
+  const filters = [
+    !terms.length || terms.every(term => searchable.some(word =>
+      word.includes(term) ||
+      (term.length >= 4 && word.length >= 4 && editDistanceWithinOne(term, word))
+    )),
+    !type || searchText(listing.type) === searchText(type),
+    !bedroomCount || (bedroomCount === "4"
+      ? Number(listing.beds) >= 4
+      : Number(listing.beds) === Number(bedroomCount)),
+    !minRent || rentMax >= minRent,
+    !maxRent || rentMin <= maxRent
+  ];
+  return filters.every(Boolean);
 }
 function applyTheme(theme) {
   const dark = theme === "dark";
@@ -112,34 +171,79 @@ function renderListings() {
     if (p.has("minRent") && $("#property-min")) $("#property-min").value = p.get("minRent");
     if (p.has("maxRent") && $("#property-max")) $("#property-max").value = p.get("maxRent");
     const update = () => {
-      const q = ($("#property-q")?.value || "").trim().toLowerCase();
-      const t = $("#property-type")?.value || "";
-      const b = $("#property-beds")?.value || "";
+      const searchQuery = $("#property-q")?.value || "";
+      const type = $("#property-type")?.value || "";
+      const bedroomCount = $("#property-beds")?.value || "";
       const minRent = Number($("#property-min")?.value || 0);
       const maxRent = Number($("#property-max")?.value || 0);
-      const list = activeListings().filter(l =>
-        (`${l.address || ""} ${l.city || ""} ${l.zip || ""}`).toLowerCase().includes(q) &&
-        (!t || l.type === t) &&
-        (!b || (b === "4" ? Number(l.beds) >= 4 : Number(l.beds) === Number(b))) &&
-        (!minRent || Number(l.rentMax ?? l.rent ?? 0) >= minRent) &&
-        (!maxRent || Number(l.rentMin ?? l.rent ?? 0) <= maxRent)
-      );
+      const minInput = $("#property-min"), maxInput = $("#property-max");
+      maxInput?.setCustomValidity(minRent && maxRent && minRent > maxRent
+        ? "Maximum rent must be greater than or equal to minimum rent."
+        : "");
+      if (maxInput && !maxInput.checkValidity()) {
+        $("#results-count").textContent = maxInput.validationMessage;
+        $("#property-listings").innerHTML = "";
+        return;
+      }
+      const filters = { query: searchQuery, type, beds: bedroomCount, minRent, maxRent };
+      const list = activeListings().filter(listing => matchesSearch(listing, filters));
       renderGrid($("#property-listings"), list, $("#results-count"));
     };
     $("#property-search-btn")?.addEventListener("click", update);
-    $("#property-q")?.addEventListener("keydown", e => { if (e.key === "Enter") update(); });
+    $("#property-search")?.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        update();
+      }
+    });
+    $("#property-q")?.addEventListener("input", update);
     $("#property-type")?.addEventListener("change", update);
     $("#property-beds")?.addEventListener("change", update);
-    $("#property-min")?.addEventListener("change", update);
-    $("#property-max")?.addEventListener("change", update);
+    $("#property-min")?.addEventListener("input", update);
+    $("#property-max")?.addEventListener("input", update);
+    $("#property-clear-btn")?.addEventListener("click", () => {
+      $("#property-q").value = "";
+      $("#property-type").value = "";
+      $("#property-beds").value = "";
+      $("#property-min").value = "";
+      $("#property-max").value = "";
+      history.replaceState(null, "", location.pathname);
+      update();
+    });
     update();
   }
   $("#home-search-btn")?.addEventListener("click", () => {
     const p = new URLSearchParams(), q = $("#home-q")?.value.trim() || "", t = $("#home-type")?.value || "", b = $("#home-beds")?.value || "";
     const minRent = $("#home-min-rent")?.value || "", maxRent = $("#home-max-rent")?.value || "";
+    const minInput = $("#home-min-rent"), maxInput = $("#home-max-rent");
+    maxInput?.setCustomValidity(Number(minRent) && Number(maxRent) && Number(minRent) > Number(maxRent)
+      ? "Maximum rent must be greater than or equal to minimum rent."
+      : "");
+    if (maxInput && !maxInput.reportValidity()) return;
     if (q) p.set("q", q); if (t) p.set("type", t); if (b) p.set("beds", b);
     if (minRent) p.set("minRent", minRent); if (maxRent) p.set("maxRent", maxRent);
     location.href = "/pages/properties.html" + (p.toString() ? "?" + p : "");
+  });
+  $("#home-max-rent")?.addEventListener("input", () => {
+    const minimum = Number($("#home-min-rent")?.value || 0);
+    const maximum = Number($("#home-max-rent")?.value || 0);
+    $("#home-max-rent").setCustomValidity(minimum && maximum && minimum > maximum
+      ? "Maximum rent must be greater than or equal to minimum rent."
+      : "");
+  });
+  $("#home-search")?.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      $("#home-search-btn")?.click();
+    }
+  });
+  $("#home-clear-btn")?.addEventListener("click", () => {
+    $("#home-q").value = "";
+    $("#home-type").value = "";
+    $("#home-beds").value = "";
+    $("#home-min-rent").value = "";
+    $("#home-max-rent").value = "";
+    $("#home-max-rent").setCustomValidity("");
   });
 }
 function openDetails(id, focusBooking = false) {
@@ -217,16 +321,18 @@ function initMailForms() {
 function initApplication() {
   const select = $("#application-property"), form = $("#application-form");
   if (!select || !form) return;
-  // The form is populated after the public listing query completes.
-  const populate = () => {
+  const populate = listingsLoaded => {
+    if (!listingsLoaded) {
+      select.innerHTML = '<option value="">Could not load properties</option><option value="not-sure">Not sure yet</option>';
+      return;
+    }
     const listings = activeListings(), id = new URLSearchParams(location.search).get("property");
     select.innerHTML = '<option value="">Select a property</option><option value="not-sure">Not sure yet</option>' + listings.map(l => `<option value="${esc(l.id)}">${esc(l.address)} — ${esc(l.city)} (${rentRange(l)}/mo)</option>`).join("");
     if (id && listings.some(l => l.id === id)) select.value = id;
     else if (!listings.length) select.value = "not-sure";
   };
-  populate();
-  const previousRefresh = window.jstarOnListingsLoaded;
-  window.jstarOnListingsLoaded = () => { populate(); previousRefresh?.(); };
+  window.jstarOnListingsLoaded = populate;
+  if (listingsReady) populate(true);
   form.addEventListener("submit", e => {
     e.preventDefault(); if (!form.reportValidity()) return;
     const d = Object.fromEntries(new FormData(form).entries()), l = activeListings().find(x => x.id === select.value);

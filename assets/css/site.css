@@ -436,6 +436,12 @@ p {
   align-items: end;
 }
 
+.search-help {
+  margin: 12px 2px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .f {
   flex: 1;
   min-width: 140px;
