@@ -58,12 +58,28 @@ function initAdmin() {
     const signedInStatus = $("#admin-auth-status-signed-in");
     if (signedInStatus) signedInStatus.textContent = user ? `Signed in as ${user.email}` : "";
   };
+  let retainedPhotos = [];
+  let selectedPhotoFiles = [];
+  const renderPhotoPreview = () => {
+    const preview = $("#listing-photo-preview");
+    if (!preview) return;
+    const existing = retainedPhotos.map((url, index) =>
+      `<div class="photo-preview-item"><img src="${esc(url)}" alt="Existing property photo ${index + 1}"><button class="button button-secondary" type="button" data-remove-existing-photo="${index}" aria-label="Remove existing photo ${index + 1}">Remove</button></div>`
+    );
+    const selected = selectedPhotoFiles.map((file, index) =>
+      `<div class="photo-preview-item photo-preview-file"><span class="meta">${esc(file.name)}</span><button class="button button-secondary" type="button" data-remove-selected-photo="${index}" aria-label="Remove ${esc(file.name)}">Remove</button></div>`
+    );
+    preview.innerHTML = existing.concat(selected).join("") ||
+      '<span class="meta">No photos selected. Removing a photo takes effect when you save the listing.</span>';
+  };
   const reset = () => {
     form.reset(); $("#listing-id").value = ""; $("#listing-state").value = "PA";
     $("#listing-beds").value = "1"; $("#listing-baths").value = "1";
     $("#admin-form-title").textContent = "Add a property"; $("#listing-cancel").hidden = true;
     $("#listing-error").textContent = ""; $("#listing-photos").value = "";
-    $("#listing-photo-preview").innerHTML = "";
+    retainedPhotos = [];
+    selectedPhotoFiles = [];
+    renderPhotoPreview();
   };
   let adminListings = [];
   let adminBookings = [];
@@ -227,18 +243,25 @@ function initAdmin() {
   });
   $("#listing-photos")?.addEventListener("change", event => {
     const input = event.currentTarget;
-    const preview = $("#listing-photo-preview");
     const files = [...input.files];
     try {
       validateImageFiles(files);
       setAdminMessage("");
-      preview.innerHTML = files.map(f => `<span class="meta">${esc(f.name)}</span>`).join(" · ");
+      selectedPhotoFiles.push(...files);
+      input.value = "";
+      renderPhotoPreview();
     } catch (err) {
       input.value = "";
-      preview.textContent = "";
       setAdminMessage(err.message, true);
       showToast(err.message, "error");
     }
+  });
+  $("#listing-photo-preview")?.addEventListener("click", event => {
+    const removeExisting = event.target.closest("[data-remove-existing-photo]");
+    const removeSelected = event.target.closest("[data-remove-selected-photo]");
+    if (removeExisting) retainedPhotos.splice(Number(removeExisting.dataset.removeExistingPhoto), 1);
+    if (removeSelected) selectedPhotoFiles.splice(Number(removeSelected.dataset.removeSelectedPhoto), 1);
+    if (removeExisting || removeSelected) renderPhotoPreview();
   });
   form.addEventListener("submit", async e => {
     e.preventDefault();
@@ -253,10 +276,8 @@ function initAdmin() {
     try {
       const id = $("#listing-id").value;
       const existing = adminListings.find(l => l.id === id);
-      const chosenFiles = [...($("#listing-photos")?.files || [])];
-      const uploaded = chosenFiles.length ? await uploadImages(chosenFiles) : [];
-      const existingPhotos = existing ? photosOf(existing) : [];
-      const photos = [...existingPhotos, ...uploaded];
+      const uploaded = selectedPhotoFiles.length ? await uploadImages(selectedPhotoFiles) : [];
+      const photos = [...retainedPhotos, ...uploaded];
       const listing = {
         address: $("#listing-address").value.trim(),
         city: $("#listing-city").value.trim(),
@@ -316,7 +337,9 @@ function initAdmin() {
       $("#listing-id").value = listing.id;
       $("#admin-form-title").textContent = "Edit property";
       $("#listing-cancel").hidden = false;
-      $("#listing-photo-preview").textContent = `${photosOf(listing).length} existing photo(s). Newly selected photos will be added.`;
+      retainedPhotos = [...photosOf(listing)];
+      selectedPhotoFiles = [];
+      renderPhotoPreview();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
     if (del && confirm("Delete this property listing from Firestore?")) {

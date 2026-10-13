@@ -224,7 +224,12 @@ button, input, select, textarea { font-size: inherit; }
 .input-prefix > span { position: absolute; top: 9px; left: 11px; color: var(--admin-muted); font-size: 12px; }
 .input-prefix input { padding-left: 25px !important; }
 .field-help { display: block; margin-top: 5px; color: var(--admin-muted); font-size: 9px; line-height: 1.5; }
-.photo-preview { margin-top: 5px; color: var(--admin-muted); font-size: 10px; }
+.photo-preview { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 9px; color: var(--admin-muted); font-size: 10px; }
+.photo-preview-item { display: grid; justify-items: start; gap: 5px; width: 96px; }
+.photo-preview-item img { width: 96px; height: 72px; border: 1px solid var(--admin-border); border-radius: 6px; object-fit: cover; }
+.photo-preview-item .button { min-height: 26px; padding: 4px 8px; font-size: 9px; }
+.photo-preview-file { align-content: start; }
+.photo-preview-file .meta { overflow-wrap: anywhere; }
 .featured-option { display: flex; align-items: flex-start; gap: 9px; width: fit-content; margin-top: 17px; cursor: pointer; }
 .featured-option input { margin: 3px 0 0; accent-color: var(--admin-blue); }
 .featured-option span { display: grid; gap: 1px; }
