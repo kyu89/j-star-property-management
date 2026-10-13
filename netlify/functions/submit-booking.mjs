@@ -98,13 +98,6 @@ export default async request => {
         throw unavailable;
       }
       property = snapshot.data();
-      transaction.update(propertyRef, {
-        status: "booked",
-        published: false,
-        bookingId: bookingRef.id,
-        bookedAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp()
-      });
       transaction.set(bookingRef, {
         propertyId,
         address: property.address || "",
@@ -117,7 +110,7 @@ export default async request => {
         moveInDate,
         occupants,
         message,
-        status: "booked",
+        status: "pending",
         createdAt: FieldValue.serverTimestamp()
       });
     });
@@ -137,7 +130,7 @@ export default async request => {
           reply_to: email,
           subject: `New property booking: ${String(property.address || "Property").replace(/[\r\n]/g, " ").slice(0, 120)}`,
           text: [
-            "A property was booked from the J Star website.",
+            "A new property booking request was submitted on the J Star website. It is pending admin approval.",
             "",
             `Property: ${property.address || ""}, ${property.city || ""}, ${property.state || "PA"} ${property.zip || ""}`,
             `Rent: $${Number(property.rent || 0).toLocaleString("en-US")}/month`,

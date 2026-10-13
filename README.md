@@ -21,11 +21,13 @@ Netlify deploy rather than Live Server alone.
 ## Property bookings
 
 Visitors can submit a booking request from a property card. The Netlify
-`submit-booking` function atomically marks an available property as booked in
-Firestore, records the applicant details in the `bookings` collection, and
-sends an email notification through Resend. Signed-in admins can review recent
-bookings in the admin dashboard; only the email configured as `ADMIN_EMAIL`
-can retrieve those records through the admin function.
+`submit-booking` function records the applicant details with a pending status
+in the Firestore `bookings` collection and sends an email notification through
+Resend. The property remains available until an admin approves the request.
+Signed-in admins can review recent bookings in the admin dashboard; only the
+email configured as `ADMIN_EMAIL` can retrieve or approve those records
+through the admin function. Approval atomically marks the booking approved and
+the property booked and unpublished.
 
 Configure these environment variables in Netlify before enabling bookings:
 

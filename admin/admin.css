@@ -241,6 +241,7 @@ button, input, select, textarea { font-size: inherit; }
 .listing-badge { padding: 3px 7px; border-radius: 20px; background: #e6f5ee; color: var(--admin-green); font-size: 8px; font-weight: 800; letter-spacing: .06em; white-space: nowrap; }
 .listing-badge.rented { background: #f0f1f4; color: #747e8e; }
 .listing-badge.booked { background: #fff1d6; color: #8a5a00; }
+.listing-badge.pending { background: #e8efff; color: #315b9b; }
 .listing-card-actions { display: flex; gap: 7px; margin-top: 12px; }
 .listing-card-actions button { min-height: 29px; padding: 5px 10px; font-size: 10px; }
 .listing-card-actions .delete-button { color: #ad3b3b; background: #fff; border-color: #edd4d4; }

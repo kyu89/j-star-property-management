@@ -73,7 +73,11 @@ function initAdmin() {
     if (!container) return;
     container.innerHTML = adminBookings.map(booking => {
       const submittedAt = booking.createdAt ? new Date(booking.createdAt).toLocaleString() : "Date unavailable";
-      return `<article class="listing-card booking-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(booking.name)}</strong><span class="listing-badge booked">BOOKED</span></div><p><strong>${esc(booking.address)}</strong></p><p>${esc(booking.email)} · ${esc(booking.phone)}</p><p class="meta">Requested ${esc(submittedAt)} · ${Number(booking.occupants)} occupant(s)${booking.moveInDate ? ` · Move-in ${esc(booking.moveInDate)}` : ""}</p>${booking.message ? `<p class="booking-message">${esc(booking.message)}</p>` : ""}</article>`;
+      const approved = booking.status === "approved" || booking.status === "booked";
+      const statusClass = approved ? "booked" : "pending";
+      const statusLabel = approved ? "APPROVED" : "PENDING";
+      const approveButton = approved ? "" : `<div class="listing-card-actions"><button class="button button-primary" data-approve="${esc(booking.id)}" type="button">Approve booking</button></div>`;
+      return `<article class="listing-card booking-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(booking.name)}</strong><span class="listing-badge ${statusClass}">${statusLabel}</span></div><p><strong>${esc(booking.address)}</strong></p><p>${esc(booking.email)} · ${esc(booking.phone)}</p><p class="meta">Requested ${esc(submittedAt)} · ${Number(booking.occupants)} occupant(s)${booking.moveInDate ? ` · Move-in ${esc(booking.moveInDate)}` : ""}</p>${booking.message ? `<p class="booking-message">${esc(booking.message)}</p>` : ""}${approveButton}</article>`;
     }).join("") || '<p class="empty-state">No bookings yet.</p>';
   };
   const loadBookings = async () => {
@@ -95,6 +99,35 @@ function initAdmin() {
       if (container) container.innerHTML = '<p class="empty-state">Could not load bookings. Check the Netlify function configuration and admin account settings.</p>';
     }
   };
+  $("#admin-bookings")?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-approve]");
+    if (!button) return;
+    const user = auth.currentUser;
+    if (!user) {
+      showToast("Please sign in first.", "error");
+      return;
+    }
+    button.disabled = true;
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch("/.netlify/functions/admin-bookings", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ action: "approve", bookingId: button.dataset.approve })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not approve this booking.");
+      await loadBookings();
+      showToast("Booking approved. The property is now marked booked.");
+    } catch (error) {
+      console.error("Could not approve booking:", error);
+      showToast(error.message || "Could not approve this booking. Please try again.", "error");
+      button.disabled = false;
+    }
+  });
   const render = () => {
     $("#admin-total-count").textContent = String(adminListings.length);
     $("#admin-available-count").textContent = String(adminListings.filter(l => l.status === "available" && l.published !== false).length);
