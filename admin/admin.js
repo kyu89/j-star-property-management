@@ -1,6 +1,6 @@
 import { auth, db } from "../assets/js/firebase.js";
 import {
-  collection, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, doc,
+  collection, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, deleteField, doc,
   query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 import {
@@ -105,14 +105,22 @@ function initAdmin() {
       const response = await fetch("/.netlify/functions/admin-bookings", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Could not load bookings.");
+      const responseText = await response.text();
+      let result = {};
+      try {
+        result = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        result = {};
+      }
+      if (!response.ok) {
+        throw new Error(result.error || `Netlify returned HTTP ${response.status}.`);
+      }
       if (auth.currentUser !== user) return;
       adminBookings = result.bookings;
       renderBookings();
     } catch (err) {
       console.error("Could not load admin bookings:", err);
-      if (container) container.innerHTML = '<p class="empty-state">Could not load bookings. Check the Netlify function configuration and admin account settings.</p>';
+      if (container) container.innerHTML = `<p class="empty-state booking-error">Could not load booking inquiries. Check the deployed Netlify admin-bookings function and admin authentication. ${esc(err.message || "Request failed.")} Use Refresh bookings to retry.</p>`;
     }
   };
   $("#admin-bookings")?.addEventListener("click", async event => {
@@ -146,10 +154,12 @@ function initAdmin() {
   });
   const render = () => {
     $("#admin-total-count").textContent = String(adminListings.length);
-    $("#admin-available-count").textContent = String(adminListings.filter(l => l.status === "available" && l.published !== false).length);
+    const availableListings = adminListings.filter(l => l.status === "available" && l.published !== false);
+    const unavailableListings = adminListings.filter(l => l.status === "booked" || l.status === "rented" || l.published === false);
+    $("#admin-available-count").textContent = String(availableListings.length);
     $("#admin-booked-count").textContent = String(adminListings.filter(l => l.status === "booked").length);
     $("#admin-rented-count").textContent = String(adminListings.filter(l => l.status === "rented" || (l.published === false && l.status !== "booked")).length);
-    $("#admin-listings").innerHTML = adminListings.map(l => {
+    const renderListingCards = (listings, emptyMessage) => listings.map(l => {
       const photo = firstPhoto(l);
       const booked = l.status === "booked";
       const unavailable = l.status === "rented" || (l.published === false && !booked);
@@ -157,8 +167,13 @@ function initAdmin() {
       const viewingHours = Array.isArray(l.viewingDays) && l.viewingDays.length && l.viewingStartTime && l.viewingEndTime
         ? ` · Viewings ${esc(l.viewingDays.join(", "))} ${esc(l.viewingStartTime)}–${esc(l.viewingEndTime)}`
         : "";
-      return `<article class="listing-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(l.address)}</strong><span class="listing-badge${booked ? " booked" : unavailable ? " rented" : ""}">${statusLabel}</span></div>${photo ? `<img class="listing-card-photo" src="${esc(photo)}" alt="">` : ""}<p>${esc(l.city)}, ${esc(l.state || "PA")} · <strong>${rentRange(l)}/mo</strong></p><p class="meta">${esc(l.type)} · ${esc(beds(l))}${l.available ? ` · Move-in from ${esc(l.available)}` : ""}${viewingHours}</p><div class="listing-card-actions"><button class="button button-secondary" data-edit="${esc(l.id)}" type="button">Edit</button><button class="button delete-button" data-delete="${esc(l.id)}" type="button">Delete</button></div></article>`;
-    }).join("") || '<p class="empty-state">No listings yet. Add your first property above.</p>';
+      const restoreButton = unavailable
+        ? `<button class="button button-primary" data-mark-available="${esc(l.id)}" type="button">Mark available</button>`
+        : "";
+      return `<article class="listing-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(l.address)}</strong><span class="listing-badge${booked ? " booked" : unavailable ? " rented" : ""}">${statusLabel}</span></div>${photo ? `<img class="listing-card-photo" src="${esc(photo)}" alt="">` : ""}<p>${esc(l.city)}, ${esc(l.state || "PA")} · <strong>${rentRange(l)}/mo</strong></p><p class="meta">${esc(l.type)} · ${esc(beds(l))}${l.available ? ` · Move-in from ${esc(l.available)}` : ""}${viewingHours}</p><div class="listing-card-actions">${restoreButton}<button class="button button-secondary" data-edit="${esc(l.id)}" type="button">Edit</button><button class="button delete-button" data-delete="${esc(l.id)}" type="button">Delete</button></div></article>`;
+    }).join("") || `<p class="empty-state">${emptyMessage}</p>`;
+    $("#admin-listings").innerHTML = renderListingCards(availableListings, "No available properties. When an unavailable listing is marked available, it will appear here.");
+    $("#admin-unavailable-listings").innerHTML = renderListingCards(unavailableListings, "No booked or rented properties.");
   };
   const watchListings = () => {
     unsubscribeListings?.();
@@ -324,7 +339,28 @@ function initAdmin() {
     } finally { submit.disabled = false; }
   });
   $("#listing-cancel")?.addEventListener("click", reset);
-  $("#admin-listings")?.addEventListener("click", async e => {
+  const handleListingAction = async e => {
+    const markAvailable = e.target.closest("[data-mark-available]");
+    if (markAvailable) {
+      markAvailable.disabled = true;
+      try {
+        await updateDoc(doc(db, JSTAR.collection, markAvailable.dataset.markAvailable), {
+          status: "available",
+          published: true,
+          bookingId: deleteField(),
+          bookedAt: deleteField(),
+          updatedAt: new Date().toISOString(),
+          updatedBy: auth.currentUser?.uid || ""
+        });
+        await load();
+        showToast("Property is available and has been returned to the available listings.");
+      } catch (error) {
+        console.error("Could not mark property available:", error);
+        showToast("Could not mark this property available. Check Firestore rules and try again.", "error");
+        markAvailable.disabled = false;
+      }
+      return;
+    }
     const edit = e.target.closest("[data-edit]"), del = e.target.closest("[data-delete]");
     if (edit) {
       const listing = adminListings.find(x => x.id === edit.dataset.edit);
@@ -355,7 +391,9 @@ function initAdmin() {
         showToast(message, "error");
       }
     }
-  });
+  };
+  $("#admin-listings")?.addEventListener("click", handleListingAction);
+  $("#admin-unavailable-listings")?.addEventListener("click", handleListingAction);
 }
 
 document.addEventListener("DOMContentLoaded", initAdmin);

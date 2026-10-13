@@ -180,20 +180,30 @@
           <div class="panel-heading">
             <div>
               <div class="section-kicker">PORTFOLIO</div>
-              <h2 id="listings-heading">All listings</h2>
+              <h2 id="listings-heading">Available properties</h2>
             </div>
             <a class="text-action" href="#listing-editor">＋ Add property</a>
           </div>
-          <div class="admin-listings" id="admin-listings"><p class="empty-state">Your listings will appear here after sign in.</p></div>
+          <div class="admin-listings" id="admin-listings"><p class="empty-state">Your available listings will appear here after sign in.</p></div>
+        </section>
+        <section class="panel listings-panel" id="unavailable-management" aria-labelledby="unavailable-heading">
+          <div class="panel-heading">
+            <div>
+              <div class="section-kicker">PROPERTY STATUS</div>
+              <h2 id="unavailable-heading">Booked and rented properties</h2>
+            </div>
+          </div>
+          <div class="admin-listings" id="admin-unavailable-listings"><p class="empty-state">Booked and rented listings will appear here.</p></div>
         </section>
         <section class="panel listings-panel" id="booking-management" aria-labelledby="bookings-heading">
           <div class="panel-heading">
             <div>
               <div class="section-kicker">INQUIRIES</div>
-              <h2 id="bookings-heading">Property bookings</h2>
+              <h2 id="bookings-heading">Booking inquiries</h2>
             </div>
             <button class="button button-secondary" id="admin-refresh-bookings" type="button">Refresh bookings</button>
           </div>
+          <p class="panel-description">Visitor-submitted requests appear here for review. Approving a request marks its property booked; this list does not contain properties changed manually to booked or rented.</p>
           <div class="admin-listings" id="admin-bookings"><p class="empty-state">Booking requests will appear here.</p></div>
         </section>
         <footer class="admin-footer">© <span data-year></span> J Star Property Management <span>·</span> Admin workspace</footer>
