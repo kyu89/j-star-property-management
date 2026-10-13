@@ -17,6 +17,11 @@ export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 export const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 export const money = v => "$" + Number(v || 0).toLocaleString("en-US");
+export const rentRange = l => {
+  const min = Number(l.rentMin ?? l.rent ?? 0);
+  const max = Number(l.rentMax ?? l.rent ?? min);
+  return min === max ? money(min) : `${money(min)}–${money(max)}`;
+};
 export const beds = l => `${Number(l.beds) === 0 ? "Studio" : `${l.beds ?? 0} bd`} · ${l.baths || 0} ba${l.size ? " · " + Number(l.size).toLocaleString() + " sf" : ""}`;
 let cachedListings = [];
 let listingsReady = false;
@@ -80,7 +85,16 @@ function initShared() {
 function card(l) {
   const photo = firstPhoto(l);
   const bg = photo ? `style="background-image:url('${esc(photo)}')"` : "";
-  return `<article class="lc"><div class="ph" ${bg}>${photo ? "" : "Photo coming soon"}</div><div class="b">${l.featured ? '<span class="tag" style="margin-bottom:8px">FEATURED</span>' : ""}<div class="price">${money(l.rent)}<span class="meta"> /mo</span></div><h3 style="margin:8px 0">${esc(l.address)}</h3><div class="meta">${esc(l.city)}, ${esc(l.state || "PA")} ${esc(l.zip || "")} · ${esc(l.type || "")}</div><div class="meta" style="margin:8px 0 16px">${esc(beds(l))}</div><div class="row" style="margin-top:auto;padding-top:16px"><button class="sm" type="button" data-details="${esc(l.id)}">View details</button><button class="btn sm outline" type="button" data-book="${esc(l.id)}">Book</button><a class="btn sm outline" href="/pages/apply.html?property=${encodeURIComponent(l.id)}">Apply</a><a class="btn sm outline" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${l.address}, ${l.city}, ${l.state || "PA"} ${l.zip || ""}`)}">Map</a></div></div></article>`;
+  const viewingHours = formatViewingHours(l);
+  return `<article class="lc"><div class="ph" ${bg}>${photo ? "" : "Photo coming soon"}</div><div class="b">${l.featured ? '<span class="tag" style="margin-bottom:8px">FEATURED</span>' : ""}<div class="price">${rentRange(l)}<span class="meta"> /mo</span></div><h3 style="margin:8px 0">${esc(l.address)}</h3><div class="meta">${esc(l.city)}, ${esc(l.state || "PA")} ${esc(l.zip || "")} · ${esc(l.type || "")}</div><div class="meta" style="margin:8px 0 16px">${esc(beds(l))}${l.available ? `<br>Move-in from ${esc(l.available)}` : ""}${viewingHours ? `<br>${esc(viewingHours)}` : ""}</div><div class="row" style="margin-top:auto;padding-top:16px"><button class="sm" type="button" data-details="${esc(l.id)}">View details</button><button class="btn sm outline" type="button" data-book="${esc(l.id)}">Book</button><a class="btn sm outline" href="/pages/apply.html?property=${encodeURIComponent(l.id)}">Apply</a><a class="btn sm outline" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${l.address}, ${l.city}, ${l.state || "PA"} ${l.zip || ""}`)}">Map</a></div></div></article>`;
+}
+function formatViewingHours(l) {
+  if (!Array.isArray(l.viewingDays) || !l.viewingDays.length || !l.viewingStartTime || !l.viewingEndTime) return "";
+  const formatTime = value => {
+    const [hour, minute] = value.split(":").map(Number);
+    return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${hour >= 12 ? "PM" : "AM"}`;
+  };
+  return `Viewings: ${l.viewingDays.join(", ")} ${formatTime(l.viewingStartTime)}–${formatTime(l.viewingEndTime)}`;
 }
 function renderGrid(el, list, count) {
   if (!el) return;
@@ -95,16 +109,20 @@ function renderListings() {
     if (p.has("q") && $("#property-q")) $("#property-q").value = p.get("q");
     if (p.has("type") && $("#property-type")) $("#property-type").value = p.get("type");
     if (p.has("beds") && $("#property-beds")) $("#property-beds").value = p.get("beds");
+    if (p.has("minRent") && $("#property-min")) $("#property-min").value = p.get("minRent");
+    if (p.has("maxRent") && $("#property-max")) $("#property-max").value = p.get("maxRent");
     const update = () => {
       const q = ($("#property-q")?.value || "").trim().toLowerCase();
       const t = $("#property-type")?.value || "";
       const b = $("#property-beds")?.value || "";
-      const m = $("#property-max")?.value || "";
+      const minRent = Number($("#property-min")?.value || 0);
+      const maxRent = Number($("#property-max")?.value || 0);
       const list = activeListings().filter(l =>
         (`${l.address || ""} ${l.city || ""} ${l.zip || ""}`).toLowerCase().includes(q) &&
         (!t || l.type === t) &&
         (!b || (b === "4" ? Number(l.beds) >= 4 : Number(l.beds) === Number(b))) &&
-        (!m || Number(l.rent) <= Number(m))
+        (!minRent || Number(l.rentMax ?? l.rent ?? 0) >= minRent) &&
+        (!maxRent || Number(l.rentMin ?? l.rent ?? 0) <= maxRent)
       );
       renderGrid($("#property-listings"), list, $("#results-count"));
     };
@@ -112,12 +130,15 @@ function renderListings() {
     $("#property-q")?.addEventListener("keydown", e => { if (e.key === "Enter") update(); });
     $("#property-type")?.addEventListener("change", update);
     $("#property-beds")?.addEventListener("change", update);
+    $("#property-min")?.addEventListener("change", update);
     $("#property-max")?.addEventListener("change", update);
     update();
   }
   $("#home-search-btn")?.addEventListener("click", () => {
     const p = new URLSearchParams(), q = $("#home-q")?.value.trim() || "", t = $("#home-type")?.value || "", b = $("#home-beds")?.value || "";
+    const minRent = $("#home-min-rent")?.value || "", maxRent = $("#home-max-rent")?.value || "";
     if (q) p.set("q", q); if (t) p.set("type", t); if (b) p.set("beds", b);
+    if (minRent) p.set("minRent", minRent); if (maxRent) p.set("maxRent", maxRent);
     location.href = "/pages/properties.html" + (p.toString() ? "?" + p : "");
   });
 }
@@ -127,9 +148,10 @@ function openDetails(id, focusBooking = false) {
   const photos = photosOf(l);
   const photo = photos.length ? `<img src="${esc(photos[0])}" alt="Property at ${esc(l.address)}" style="width:100%;max-height:320px;object-fit:cover;border-radius:12px;margin-bottom:18px">` : "";
   const gallery = photos.length > 1 ? `<div class="g3" style="margin-bottom:16px">${photos.slice(1).map(url => `<img src="${esc(url)}" alt="Additional property photo" style="width:100%;height:120px;object-fit:cover;border-radius:10px">`).join("")}</div>` : "";
+  const viewingHours = formatViewingHours(l);
   const bookingForm = `<section class="booking-section" aria-labelledby="booking-heading"><h3 id="booking-heading">Book this property</h3><p>Send a booking request. The property remains available until J Star approves your request.</p><form id="booking-form" data-property-id="${esc(l.id)}"><div class="booking-fields"><div><label for="booking-name">Full name *</label><input id="booking-name" name="name" autocomplete="name" maxlength="100" required></div><div><label for="booking-email">Email *</label><input id="booking-email" name="email" type="email" autocomplete="email" maxlength="254" required></div><div><label for="booking-phone">Phone *</label><input id="booking-phone" name="phone" type="tel" autocomplete="tel" maxlength="30" required></div><div><label for="booking-move-in">Desired move-in date</label><input id="booking-move-in" name="moveInDate" type="date" min="${new Date().toISOString().slice(0, 10)}"></div><div><label for="booking-occupants">Number of occupants *</label><input id="booking-occupants" name="occupants" type="number" min="1" max="20" value="1" required></div><div class="booking-fields-wide"><label for="booking-message">Message</label><textarea id="booking-message" name="message" maxlength="2000" rows="3" placeholder="Anything you'd like us to know?"></textarea></div></div><label class="booking-honey" aria-hidden="true">Leave this field blank<input name="website" tabindex="-1" autocomplete="off"></label><p class="booking-feedback" id="booking-feedback" aria-live="polite"></p><button class="btn" type="submit">Submit booking request</button></form></section>`;
   const modal = $("#modal-root");
-  modal.innerHTML = `<div class="modal-backdrop" data-close-modal><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${photo}${gallery}<h2 id="modal-title">${esc(l.address)}</h2><p>${esc(l.city)}, ${esc(l.state || "PA")} ${esc(l.zip || "")}</p><div class="price">${money(l.rent)}<span class="meta"> /mo</span></div><p class="meta">${esc(beds(l))} · ${esc(l.type || "")}${l.available ? " · Available " + esc(l.available) : ""}</p><p style="white-space:pre-wrap">${esc(l.description || "Contact J Star for more information about this property.")}</p><div class="row"><a class="btn outline" href="/pages/apply.html?property=${encodeURIComponent(l.id)}">Apply online</a><button type="button" class="outline" data-close-modal>Close</button></div>${bookingForm}</div></div>`;
+  modal.innerHTML = `<div class="modal-backdrop" data-close-modal><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${photo}${gallery}<h2 id="modal-title">${esc(l.address)}</h2><p>${esc(l.city)}, ${esc(l.state || "PA")} ${esc(l.zip || "")}</p><div class="price">${rentRange(l)}<span class="meta"> /mo</span></div><p class="meta">${esc(beds(l))} · ${esc(l.type || "")}${l.available ? " · Move-in from " + esc(l.available) : ""}${viewingHours ? `<br>${esc(viewingHours)}` : ""}</p><p style="white-space:pre-wrap">${esc(l.description || "Contact J Star for more information about this property.")}</p><div class="row"><a class="btn outline" href="/pages/apply.html?property=${encodeURIComponent(l.id)}">Apply online</a><button type="button" class="outline" data-close-modal>Close</button></div>${bookingForm}</div></div>`;
   if (focusBooking) $("#booking-name")?.focus();
 }
 function initListings() {
@@ -198,7 +220,7 @@ function initApplication() {
   // The form is populated after the public listing query completes.
   const populate = () => {
     const listings = activeListings(), id = new URLSearchParams(location.search).get("property");
-    select.innerHTML = '<option value="">Select a property</option><option value="not-sure">Not sure yet</option>' + listings.map(l => `<option value="${esc(l.id)}">${esc(l.address)} — ${esc(l.city)} (${money(l.rent)}/mo)</option>`).join("");
+    select.innerHTML = '<option value="">Select a property</option><option value="not-sure">Not sure yet</option>' + listings.map(l => `<option value="${esc(l.id)}">${esc(l.address)} — ${esc(l.city)} (${rentRange(l)}/mo)</option>`).join("");
     if (id && listings.some(l => l.id === id)) select.value = id;
     else if (!listings.length) select.value = "not-sure";
   };

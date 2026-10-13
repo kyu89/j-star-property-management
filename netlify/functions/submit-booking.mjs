@@ -133,7 +133,7 @@ export default async request => {
             "A new property booking request was submitted on the J Star website. It is pending admin approval.",
             "",
             `Property: ${property.address || ""}, ${property.city || ""}, ${property.state || "PA"} ${property.zip || ""}`,
-            `Rent: $${Number(property.rent || 0).toLocaleString("en-US")}/month`,
+            `Rent: $${Number(property.rentMin ?? property.rent ?? 0).toLocaleString("en-US")}${Number(property.rentMax ?? property.rent ?? property.rentMin ?? 0) !== Number(property.rentMin ?? property.rent ?? 0) ? `–$${Number(property.rentMax).toLocaleString("en-US")}` : ""}/month`,
             `Applicant: ${name}`,
             `Email: ${email}`,
             `Phone: ${phone}`,

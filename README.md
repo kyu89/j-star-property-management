@@ -12,6 +12,10 @@ Static website for J Star Property Management.
 - `assets/images/` — site imagery and logo
 - `netlify.toml` — Netlify publish configuration
 
+Property listings support minimum and maximum monthly rent, an optional
+move-in date, and optional weekly viewing days and hours. Existing listings
+that only have a single `rent` value continue to display and can be edited.
+
 Legacy `/sub-pages-html/` URLs redirect to their new locations.
 
 Run the static site from the repository root with VS Code Live Server. Booking

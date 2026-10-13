@@ -6,7 +6,7 @@ import {
 import {
   onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, signOut
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { JSTAR, $, esc, money, beds, photosOf, firstPhoto } from "../assets/js/site.js";
+import { JSTAR, $, $$, esc, money, rentRange, beds, photosOf, firstPhoto } from "../assets/js/site.js";
 import { showToast } from "../assets/js/toast.js";
 
 function validateImageFiles(files) {
@@ -138,7 +138,10 @@ function initAdmin() {
       const booked = l.status === "booked";
       const unavailable = l.status === "rented" || (l.published === false && !booked);
       const statusLabel = booked ? "BOOKED" : unavailable ? "RENTED" : "AVAILABLE";
-      return `<article class="listing-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(l.address)}</strong><span class="listing-badge${booked ? " booked" : unavailable ? " rented" : ""}">${statusLabel}</span></div>${photo ? `<img class="listing-card-photo" src="${esc(photo)}" alt="">` : ""}<p>${esc(l.city)}, ${esc(l.state || "PA")} · <strong>${money(l.rent)}/mo</strong></p><p class="meta">${esc(l.type)} · ${esc(beds(l))}</p><div class="listing-card-actions"><button class="button button-secondary" data-edit="${esc(l.id)}" type="button">Edit</button><button class="button delete-button" data-delete="${esc(l.id)}" type="button">Delete</button></div></article>`;
+      const viewingHours = Array.isArray(l.viewingDays) && l.viewingDays.length && l.viewingStartTime && l.viewingEndTime
+        ? ` · Viewings ${esc(l.viewingDays.join(", "))} ${esc(l.viewingStartTime)}–${esc(l.viewingEndTime)}`
+        : "";
+      return `<article class="listing-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(l.address)}</strong><span class="listing-badge${booked ? " booked" : unavailable ? " rented" : ""}">${statusLabel}</span></div>${photo ? `<img class="listing-card-photo" src="${esc(photo)}" alt="">` : ""}<p>${esc(l.city)}, ${esc(l.state || "PA")} · <strong>${rentRange(l)}/mo</strong></p><p class="meta">${esc(l.type)} · ${esc(beds(l))}${l.available ? ` · Move-in from ${esc(l.available)}` : ""}${viewingHours}</p><div class="listing-card-actions"><button class="button button-secondary" data-edit="${esc(l.id)}" type="button">Edit</button><button class="button delete-button" data-delete="${esc(l.id)}" type="button">Delete</button></div></article>`;
     }).join("") || '<p class="empty-state">No listings yet. Add your first property above.</p>';
   };
   const watchListings = () => {
@@ -259,12 +262,17 @@ function initAdmin() {
         city: $("#listing-city").value.trim(),
         state: $("#listing-state").value.trim().toUpperCase() || "PA",
         zip: $("#listing-zip").value.trim(),
-        rent: Number($("#listing-rent").value),
+        rent: Number($("#listing-rent-min").value),
+        rentMin: Number($("#listing-rent-min").value),
+        rentMax: Number($("#listing-rent-max").value),
         type: $("#listing-type").value,
         beds: Number($("#listing-beds").value || 0),
         baths: Number($("#listing-baths").value || 0),
         size: Number($("#listing-size").value || 0),
         available: $("#listing-available").value,
+        viewingDays: $$('input[name="listing-viewing-days"]:checked', form).map(input => input.value),
+        viewingStartTime: $("#listing-viewing-start").value,
+        viewingEndTime: $("#listing-viewing-end").value,
         status: $("#listing-status").value,
         photo: photos[0] || "",
         photos,
@@ -275,7 +283,14 @@ function initAdmin() {
         updatedAt: new Date().toISOString(),
         updatedBy: user.uid
       };
-      if (!listing.address || !listing.city || !listing.rent) throw new Error("Street address, city and rent are required.");
+      if (!listing.address || !listing.city || !listing.rentMin || !listing.rentMax) throw new Error("Street address, city, and minimum and maximum rent are required.");
+      if (listing.rentMin > listing.rentMax) throw new Error("Minimum rent cannot be higher than maximum rent.");
+      const hasViewingDetails = listing.viewingDays.length || listing.viewingStartTime || listing.viewingEndTime;
+      if (hasViewingDetails &&
+          (!listing.viewingDays.length || !listing.viewingStartTime || !listing.viewingEndTime ||
+           listing.viewingStartTime >= listing.viewingEndTime)) {
+        throw new Error("Select viewing days and a valid start and end time.");
+      }
       if (id) await updateDoc(doc(db, JSTAR.collection, id), listing);
       else await addDoc(collection(db, JSTAR.collection), { ...listing, createdAt: serverTimestamp() });
       await load(); reset(); setAdminMessage("Listing saved successfully.");
@@ -293,7 +308,10 @@ function initAdmin() {
     if (edit) {
       const listing = adminListings.find(x => x.id === edit.dataset.edit);
       if (!listing) return;
-      for (const [id, key] of [["listing-address","address"],["listing-city","city"],["listing-state","state"],["listing-zip","zip"],["listing-rent","rent"],["listing-type","type"],["listing-beds","beds"],["listing-baths","baths"],["listing-size","size"],["listing-available","available"],["listing-status","status"],["listing-description","description"]]) $("#" + id).value = listing[key] ?? "";
+      for (const [id, key] of [["listing-address","address"],["listing-city","city"],["listing-state","state"],["listing-zip","zip"],["listing-rent-min","rentMin"],["listing-rent-max","rentMax"],["listing-type","type"],["listing-beds","beds"],["listing-baths","baths"],["listing-size","size"],["listing-available","available"],["listing-status","status"],["listing-viewing-start","viewingStartTime"],["listing-viewing-end","viewingEndTime"],["listing-description","description"]]) $("#" + id).value = listing[key] ?? (key === "rentMin" || key === "rentMax" ? listing.rent ?? "" : "");
+      $$('input[name="listing-viewing-days"]', form).forEach(input => {
+        input.checked = Array.isArray(listing.viewingDays) && listing.viewingDays.includes(input.value);
+      });
       $("#listing-featured").checked = !!listing.featured;
       $("#listing-id").value = listing.id;
       $("#admin-form-title").textContent = "Edit property";

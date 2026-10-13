@@ -135,7 +135,8 @@
               <div class="field"><label for="listing-city">City <span>*</span></label><input id="listing-city" placeholder="Reading" required></div>
               <div class="field field-small"><label for="listing-state">State</label><input id="listing-state" value="PA" maxlength="2"></div>
               <div class="field field-small"><label for="listing-zip">ZIP code</label><input id="listing-zip" inputmode="numeric" placeholder="19606"></div>
-              <div class="field"><label for="listing-rent">Monthly rent <span>*</span></label><div class="input-prefix"><span>$</span><input id="listing-rent" type="number" min="1" placeholder="1,500" required></div></div>
+              <div class="field"><label for="listing-rent-min">Minimum monthly rent <span>*</span></label><div class="input-prefix"><span>$</span><input id="listing-rent-min" type="number" min="1" placeholder="1,500" required></div></div>
+              <div class="field"><label for="listing-rent-max">Maximum monthly rent <span>*</span></label><div class="input-prefix"><span>$</span><input id="listing-rent-max" type="number" min="1" placeholder="1,800" required></div></div>
               <div class="field"><label for="listing-type">Property type</label><select id="listing-type"></select></div>
             </div>
 
@@ -144,7 +145,24 @@
               <div class="field"><label for="listing-beds">Bedrooms <small>(0 = studio)</small></label><input id="listing-beds" type="number" min="0" value="1"></div>
               <div class="field"><label for="listing-baths">Bathrooms</label><input id="listing-baths" type="number" min="0" step="0.5" value="1"></div>
               <div class="field"><label for="listing-size">Size <small>(sq ft)</small></label><input id="listing-size" type="number" min="0" placeholder="1,200"></div>
-              <div class="field"><label for="listing-available">Available date</label><input id="listing-available" type="date"></div>
+              <div class="field"><label for="listing-available">Move-in available date</label><input id="listing-available" type="date"></div>
+              <fieldset class="field field-full viewing-hours">
+                <legend>Viewing hours</legend>
+                <span class="field-help">Select the days and time when prospective tenants can view this property.</span>
+                <div class="viewing-days">
+                  <label><input type="checkbox" name="listing-viewing-days" value="Monday"> Mon</label>
+                  <label><input type="checkbox" name="listing-viewing-days" value="Tuesday"> Tue</label>
+                  <label><input type="checkbox" name="listing-viewing-days" value="Wednesday"> Wed</label>
+                  <label><input type="checkbox" name="listing-viewing-days" value="Thursday"> Thu</label>
+                  <label><input type="checkbox" name="listing-viewing-days" value="Friday"> Fri</label>
+                  <label><input type="checkbox" name="listing-viewing-days" value="Saturday"> Sat</label>
+                  <label><input type="checkbox" name="listing-viewing-days" value="Sunday"> Sun</label>
+                </div>
+                <div class="viewing-times">
+                  <div class="field"><label for="listing-viewing-start">From</label><input id="listing-viewing-start" type="time"></div>
+                  <div class="field"><label for="listing-viewing-end">To</label><input id="listing-viewing-end" type="time"></div>
+                </div>
+              </fieldset>
               <div class="field"><label for="listing-status">Listing status</label><select id="listing-status"><option value="available">Available / Published</option><option value="booked">Booked / Hidden</option><option value="rented">Rented / Hidden</option></select></div>
               <div class="field"><label for="listing-photos">Property photos</label><input id="listing-photos" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple><span class="field-help">JPG, PNG, or WebP only. Up to 5 MB per image. Photos are added to existing photos when editing.</span><div id="listing-photo-preview" class="photo-preview" aria-live="polite"></div></div>
               <div class="field field-full"><label for="listing-description">Description</label><textarea id="listing-description" rows="4" placeholder="Describe the property, amenities, and requirements."></textarea></div>
