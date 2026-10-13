@@ -4,46 +4,275 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#14213d">
-  <meta name="description" content="J Star Property Management helps property owners and residents across the Reading and Mount Penn, Pennsylvania area.">
+  <meta
+    name="description"
+    content="J Star Property Management helps property owners and residents across the Reading and Mount Penn, Pennsylvania area."
+  >
+
   <title>Contact | J Star Property Management</title>
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+  >
+
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/toast.css">
-  <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('jstar-theme')||'light')}catch(e){}</script>
+
+  <!-- Theme Initialization -->
+  <script>
+    try {
+      document.documentElement.setAttribute(
+        "data-theme",
+        localStorage.getItem("jstar-theme") || "light"
+      );
+    } catch (error) {
+      // Use the default theme if localStorage is unavailable.
+    }
+  </script>
+
+  <!-- Main JavaScript -->
   <script type="module" src="/assets/js/site.js"></script>
 </head>
+
 <body>
-<header>
-  <div class="bar">
-    <a class="logo" href="/"><img src="/assets/images/jstar_logo.webp" alt="J Star star logo"><span>J Star Property Management</span></a>
-    <button class="burger" id="menuToggle" type="button" aria-expanded="false" aria-controls="menu">☰ Menu</button>
-    <nav class="menu" id="menu" aria-label="Main navigation">
-      <a href="/pages/properties.html" data-page="properties">Properties</a>
-      <div class="dd"><a href="#" class="service-label" aria-disabled="true" tabindex="-1" onclick="return false;">Services ▾</a><div class="dd-panel"><a href="/pages/owners.html">For Owners</a><a href="/pages/residents.html">For Residents</a></div></div>
-      <a href="/pages/about.html" data-page="about">About</a>
-      <a href="/pages/contact.html" data-page="contact">Contact</a>
-      <a class="btn" href="/pages/apply.html">Apply Now</a>
-    </nav>
-    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme"><span class="theme-toggle__icon"><i class="fa-solid fa-moon" aria-hidden="true"></i></span><span class="theme-toggle__label">Dark</span></button>
-  </div>
-</header>
-<main id="main-content">
-<section class="hero"><div class="wrap"><div class="eyebrow">Get in touch</div><h1>Let’s talk property.</h1><p>Have a question about management, a property, or an application? Send us a message.</p></div></section>
-<section><div class="wrap g2" style="align-items:start"><div><h2>Send us a message</h2><form class="card mail-form" data-form="contact"><div><label for="contact-name">First & last name *</label><input id="contact-name" name="name" required></div><div style="margin-top:12px"><label for="contact-email">Email *</label><input id="contact-email" name="email" type="email" required></div><div style="margin-top:12px"><label for="contact-phone">Phone</label><input id="contact-phone" name="phone" type="tel"></div><div style="margin-top:12px"><label for="contact-subject">Subject *</label><input id="contact-subject" name="subject" required></div><div style="margin-top:12px"><label for="contact-message">Comments *</label><textarea id="contact-message" name="message" rows="5" required></textarea></div><p class="err" aria-live="polite"></p><button type="submit">Prepare email</button></form></div><div class="card"><h3>J Star Property Management</h3><p>2317 Perkiomen Avenue<br>Mount Penn, PA 19606</p><p><a href="tel:+14848669728">(484) 866-9728</a></p><p><a href="mailto:punyeramina@gmail.com">punyeramina@gmail.com</a></p><a class="btn outline" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=2317+Perkiomen+Avenue+Mount+Penn+PA+19606">Open in Maps</a></div></div></section>
-</main>
-<footer>
-  <div class="wrap">
-    <div class="footer-grid">
-      <div><a class="logo" href="/" style="color:#fff"><img src="/assets/images/jstar_logo.webp" alt=""><span>J Star Property Management</span></a><p style="margin-top:14px">Responsive property management for owners and residents across the Reading area.</p></div>
-      <div><h3>Explore</h3><div class="footer-links"><a href="/pages/properties.html">Available properties</a><a href="/pages/owners.html">Owner services</a><a href="/pages/residents.html">Resident services</a><a href="/pages/about.html">About J Star</a></div></div>
-      <div><h3>Contact</h3><div class="footer-links"><a href="tel:+14848669728">(484) 866-9728</a><a href="mailto:punyeramina@gmail.com">punyeramina@gmail.com</a><span>2317 Perkiomen Avenue<br>Mount Penn, PA 19606</span></div></div>
+  <!-- Header -->
+  <header>
+    <div class="bar">
+      <a class="logo" href="/">
+        <img
+          src="/assets/images/jstar_logo.webp"
+          alt="J Star star logo"
+        >
+        <span>J Star Property Management</span>
+      </a>
+
+      <button
+        class="burger"
+        id="menuToggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="menu"
+      >
+        ☰ Menu
+      </button>
+
+      <nav class="menu" id="menu" aria-label="Main navigation">
+        <a href="/pages/properties.html" data-page="properties">
+          Properties
+        </a>
+
+        <div class="dd">
+          <a
+            href="#"
+            class="service-label"
+            aria-disabled="true"
+            tabindex="-1"
+            onclick="return false;"
+          >
+            Services ▾
+          </a>
+
+          <div class="dd-panel">
+            <a href="/pages/owners.html">For Owners</a>
+            <a href="/pages/residents.html">For Residents</a>
+          </div>
+        </div>
+
+        <a href="/pages/about.html" data-page="about">About</a>
+        <a href="/pages/contact.html" data-page="contact">Contact</a>
+
+        <a class="btn" href="/pages/apply.html">Apply Now</a>
+      </nav>
+
+      <button
+        class="theme-toggle"
+        id="themeToggle"
+        type="button"
+        aria-label="Switch theme"
+      >
+        <span class="theme-toggle__icon">
+          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+        </span>
+        <span class="theme-toggle__label">Dark</span>
+      </button>
     </div>
-    <div class="copyright">© <span data-year></span> J Star Property Management. All rights reserved.</div>
-  </div>
-</footer>
-<div id="modal-root"></div>
+  </header>
+
+  <main id="main-content">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow">Get in touch</div>
+
+        <h1>Let’s talk property.</h1>
+
+        <p>
+          Have a question about management, a property, or an
+          application? Send us a message.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section>
+      <div class="wrap g2" style="align-items: start;">
+        <!-- Contact Form -->
+        <div>
+          <h2>Send us a message</h2>
+
+          <form class="card mail-form" data-form="contact">
+            <div>
+              <label for="contact-name">First &amp; last name *</label>
+              <input
+                id="contact-name"
+                name="name"
+                type="text"
+                required
+              >
+            </div>
+
+            <div style="margin-top: 12px;">
+              <label for="contact-email">Email *</label>
+              <input
+                id="contact-email"
+                name="email"
+                type="email"
+                required
+              >
+            </div>
+
+            <div style="margin-top: 12px;">
+              <label for="contact-phone">Phone</label>
+              <input
+                id="contact-phone"
+                name="phone"
+                type="tel"
+              >
+            </div>
+
+            <div style="margin-top: 12px;">
+              <label for="contact-subject">Subject *</label>
+              <input
+                id="contact-subject"
+                name="subject"
+                type="text"
+                required
+              >
+            </div>
+
+            <div style="margin-top: 12px;">
+              <label for="contact-message">Comments *</label>
+              <textarea
+                id="contact-message"
+                name="message"
+                rows="5"
+                required
+              ></textarea>
+            </div>
+
+            <p class="err" aria-live="polite"></p>
+
+            <button type="submit">Prepare email</button>
+          </form>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card">
+          <h3>J Star Property Management</h3>
+
+          <p><i class="fa-solid fa-location-dot"></i>
+            2317 Perkiomen Avenue
+            Mount Penn, PA 19606
+          </p>
+
+          <p><i class="fa-solid fa-phone"></i>
+            <a href="tel:+14848669728">
+              (484) 866-9728
+            </a>
+          </p>
+
+          <p><i class="fa-solid fa-envelope"></i>
+            <a href="mailto:punyeramina@gmail.com">
+              punyeramina@gmail.com
+            </a>
+          </p>
+
+          <a
+            class="btn outline"
+            href="https://www.google.com/maps/search/?api=1&query=2317+Perkiomen+Avenue+Mount+Penn+PA+19606"
+            target="_blank"
+            rel="noopener"
+          >
+            Open in Maps <i class="fa-solid fa-arrow-right-long"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="logo" href="/" style="color: #fff;">
+            <img src="/assets/images/jstar_logo.webp" alt="">
+            <span>J Star Property Management</span>
+          </a>
+
+          <p style="margin-top: 14px;">
+            Responsive property management for owners and residents
+            across the Reading area.
+          </p>
+        </div>
+
+        <div>
+          <h3>Explore</h3>
+
+          <div class="footer-links">
+            <a href="/pages/properties.html">Available properties</a>
+            <a href="/pages/owners.html">Owner services</a>
+            <a href="/pages/residents.html">Resident services</a>
+            <a href="/pages/about.html">About J Star</a>
+          </div>
+        </div>
+
+        <div>
+          <h3>Contact</h3>
+
+          <div class="footer-links">
+            <a href="tel:+14848669728">(484) 866-9728</a>
+            <a href="mailto:punyeramina@gmail.com">
+              punyeramina@gmail.com
+            </a>
+
+            <span>
+              2317 Perkiomen Avenue<br>
+              Mount Penn, PA 19606
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="copyright">
+        © <span data-year></span> J Star Property Management.
+        All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Container -->
+  <div id="modal-root"></div>
 </body>
 </html>
