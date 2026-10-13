@@ -80,7 +80,7 @@ function initShared() {
 function card(l) {
   const photo = firstPhoto(l);
   const bg = photo ? `style="background-image:url('${esc(photo)}')"` : "";
-  return `<article class="lc"><div class="ph" ${bg}>${photo ? "" : "Photo coming soon"}</div><div class="b">${l.featured ? '<span class="tag" style="margin-bottom:8px">FEATURED</span>' : ""}<div class="price">${money(l.rent)}<span class="meta"> /mo</span></div><h3 style="margin:8px 0">${esc(l.address)}</h3><div class="meta">${esc(l.city)}, ${esc(l.state || "PA")} ${esc(l.zip || "")} · ${esc(l.type || "")}</div><div class="meta" style="margin:8px 0 16px">${esc(beds(l))}</div><div class="row" style="margin-top:auto;padding-top:16px"><button class="sm" type="button" data-details="${esc(l.id)}">View details</button><a class="btn sm outline" href="/pages/apply.html?property=${encodeURIComponent(l.id)}">Apply</a><a class="btn sm outline" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${l.address}, ${l.city}, ${l.state || "PA"} ${l.zip || ""}`)}">Map</a></div></div></article>`;
+  return `<article class="lc"><div class="ph" ${bg}>${photo ? "" : "Photo coming soon"}</div><div class="b">${l.featured ? '<span class="tag" style="margin-bottom:8px">FEATURED</span>' : ""}<div class="price">${money(l.rent)}<span class="meta"> /mo</span></div><h3 style="margin:8px 0">${esc(l.address)}</h3><div class="meta">${esc(l.city)}, ${esc(l.state || "PA")} ${esc(l.zip || "")} · ${esc(l.type || "")}</div><div class="meta" style="margin:8px 0 16px">${esc(beds(l))}</div><div class="row" style="margin-top:auto;padding-top:16px"><button class="sm" type="button" data-details="${esc(l.id)}">View details</button><button class="btn sm outline" type="button" data-book="${esc(l.id)}">Book</button><a class="btn sm outline" href="/pages/apply.html?property=${encodeURIComponent(l.id)}">Apply</a><a class="btn sm outline" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${l.address}, ${l.city}, ${l.state || "PA"} ${l.zip || ""}`)}">Map</a></div></div></article>`;
 }
 function renderGrid(el, list, count) {
   if (!el) return;
@@ -121,13 +121,16 @@ function renderListings() {
     location.href = "/pages/properties.html" + (p.toString() ? "?" + p : "");
   });
 }
-function openDetails(id) {
+function openDetails(id, focusBooking = false) {
   const l = activeListings().find(x => x.id === id);
   if (!l) return;
   const photos = photosOf(l);
   const photo = photos.length ? `<img src="${esc(photos[0])}" alt="Property at ${esc(l.address)}" style="width:100%;max-height:320px;object-fit:cover;border-radius:12px;margin-bottom:18px">` : "";
   const gallery = photos.length > 1 ? `<div class="g3" style="margin-bottom:16px">${photos.slice(1).map(url => `<img src="${esc(url)}" alt="Additional property photo" style="width:100%;height:120px;object-fit:cover;border-radius:10px">`).join("")}</div>` : "";
-  $("#modal-root").innerHTML = `<div class="modal-backdrop" data-close-modal><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${photo}${gallery}<h2 id="modal-title">${esc(l.address)}</h2><p>${esc(l.city)}, ${esc(l.state || "PA")} ${esc(l.zip || "")}</p><div class="price">${money(l.rent)}<span class="meta"> /mo</span></div><p class="meta">${esc(beds(l))} · ${esc(l.type || "")}${l.available ? " · Available " + esc(l.available) : ""}</p><p style="white-space:pre-wrap">${esc(l.description || "Contact J Star for more information about this property.")}</p><div class="row"><a class="btn" href="/pages/apply.html?property=${encodeURIComponent(l.id)}">Apply online</a><button type="button" class="outline" data-close-modal>Close</button></div></div></div>`;
+  const bookingForm = `<section class="booking-section" aria-labelledby="booking-heading"><h3 id="booking-heading">Book this property</h3><p>Send a booking request. This property will be marked unavailable while J Star follows up.</p><form id="booking-form" data-property-id="${esc(l.id)}"><div class="booking-fields"><div><label for="booking-name">Full name *</label><input id="booking-name" name="name" autocomplete="name" maxlength="100" required></div><div><label for="booking-email">Email *</label><input id="booking-email" name="email" type="email" autocomplete="email" maxlength="254" required></div><div><label for="booking-phone">Phone *</label><input id="booking-phone" name="phone" type="tel" autocomplete="tel" maxlength="30" required></div><div><label for="booking-move-in">Desired move-in date</label><input id="booking-move-in" name="moveInDate" type="date" min="${new Date().toISOString().slice(0, 10)}"></div><div><label for="booking-occupants">Number of occupants *</label><input id="booking-occupants" name="occupants" type="number" min="1" max="20" value="1" required></div><div class="booking-fields-wide"><label for="booking-message">Message</label><textarea id="booking-message" name="message" maxlength="2000" rows="3" placeholder="Anything you'd like us to know?"></textarea></div></div><label class="booking-honey" aria-hidden="true">Leave this field blank<input name="website" tabindex="-1" autocomplete="off"></label><p class="booking-feedback" id="booking-feedback" aria-live="polite"></p><button class="btn" type="submit">Submit booking request</button></form></section>`;
+  const modal = $("#modal-root");
+  modal.innerHTML = `<div class="modal-backdrop" data-close-modal><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">${photo}${gallery}<h2 id="modal-title">${esc(l.address)}</h2><p>${esc(l.city)}, ${esc(l.state || "PA")} ${esc(l.zip || "")}</p><div class="price">${money(l.rent)}<span class="meta"> /mo</span></div><p class="meta">${esc(beds(l))} · ${esc(l.type || "")}${l.available ? " · Available " + esc(l.available) : ""}</p><p style="white-space:pre-wrap">${esc(l.description || "Contact J Star for more information about this property.")}</p><div class="row"><a class="btn outline" href="/pages/apply.html?property=${encodeURIComponent(l.id)}">Apply online</a><button type="button" class="outline" data-close-modal>Close</button></div>${bookingForm}</div></div>`;
+  if (focusBooking) $("#booking-name")?.focus();
 }
 function initListings() {
   const type = $("#home-type") || $("#property-type");
@@ -220,7 +223,44 @@ function init() {
   initShared();
   $("#modal-root")?.addEventListener("click", e => { if (e.target.matches("[data-close-modal]")) $("#modal-root").innerHTML = ""; });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#modal-root")) $("#modal-root").innerHTML = ""; });
-  document.addEventListener("click", e => { const b = e.target.closest("[data-details]"); if (b) openDetails(b.dataset.details); });
+  document.addEventListener("click", e => {
+    const book = e.target.closest("[data-book]");
+    const details = e.target.closest("[data-details]");
+    if (book) openDetails(book.dataset.book, true);
+    else if (details) openDetails(details.dataset.details);
+  });
+  $("#modal-root")?.addEventListener("submit", async e => {
+    const form = e.target.closest("#booking-form");
+    if (!form) return;
+    e.preventDefault();
+    const submit = $('button[type="submit"]', form);
+    const feedback = $("#booking-feedback", form);
+    const formData = new FormData(form);
+    const body = Object.fromEntries(formData.entries());
+    body.propertyId = form.dataset.propertyId;
+    submit.disabled = true;
+    feedback.textContent = "Submitting your booking request…";
+    feedback.classList.remove("err");
+    try {
+      const response = await fetch("/.netlify/functions/submit-booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not submit your booking. Please try again.");
+      cachedListings = cachedListings.filter(listing => listing.id !== body.propertyId);
+      renderListings();
+      const emailNotice = result.emailSent
+        ? "The property is now marked unavailable. J Star will contact you shortly."
+        : `The property is booked, but the admin notification could not be sent. Please contact us at ${esc(JSTAR.phone)}.`;
+      $("#modal-root").innerHTML = `<div class="modal-backdrop" data-close-modal><div class="modal booking-success" role="dialog" aria-modal="true" aria-labelledby="booking-success-heading"><h2 id="booking-success-heading">Booking request received</h2><p>${emailNotice}</p><button class="btn" type="button" data-close-modal>Done</button></div></div>`;
+    } catch (err) {
+      feedback.textContent = err.message || "Could not submit your booking. Please try again.";
+      feedback.classList.add("err");
+      submit.disabled = false;
+    }
+  });
   initListings(); initMailForms(); initApplication();
 }
 document.addEventListener("DOMContentLoaded", init);

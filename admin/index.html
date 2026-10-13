@@ -6,6 +6,10 @@
   <meta name="theme-color" content="#101827">
   <meta name="description" content="Administrator dashboard for J Star Property Management listings.">
   <title>Property Operations | J Star Admin</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -41,6 +45,7 @@
         <input id="admin-password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
         <p id="admin-login-error" class="form-error" aria-live="polite"></p>
         <button class="button button-primary login-submit" type="submit">Sign in to dashboard <span aria-hidden="true">→</span></button>
+        <button class="forgot-password" id="admin-forgot-password" type="button">Forgot password?</button>
       </form>
       <a class="back-link" href="/">← Back to public website</a>
     </section>
@@ -58,6 +63,7 @@
         <a class="sidebar-link active" href="#dashboard"><span class="nav-icon">▦</span>Overview</a>
         <a class="sidebar-link" href="#listing-editor"><span class="nav-icon">＋</span>Add a property</a>
         <a class="sidebar-link" href="#listing-management"><span class="nav-icon">▤</span>All listings</a>
+        <a class="sidebar-link" href="#booking-management"><span class="nav-icon">▣</span>Bookings</a>
       </nav>
       <div class="sidebar-bottom">
         <a class="public-site-link" href="/" target="_blank" rel="noopener">↗ View public website</a>
@@ -101,6 +107,11 @@
             <span class="metric-note">Published on the website</span>
           </article>
           <article class="metric-card">
+            <span class="metric-label">Booked</span>
+            <strong class="metric-value" id="admin-booked-count">0</strong>
+            <span class="metric-note">Reserved by a booking</span>
+          </article>
+          <article class="metric-card">
             <span class="metric-label">Rented / hidden</span>
             <strong class="metric-value" id="admin-rented-count">0</strong>
             <span class="metric-note">Not shown to visitors</span>
@@ -133,8 +144,8 @@
               <div class="field"><label for="listing-baths">Bathrooms</label><input id="listing-baths" type="number" min="0" step="0.5" value="1"></div>
               <div class="field"><label for="listing-size">Size <small>(sq ft)</small></label><input id="listing-size" type="number" min="0" placeholder="1,200"></div>
               <div class="field"><label for="listing-available">Available date</label><input id="listing-available" type="date"></div>
-              <div class="field"><label for="listing-status">Listing status</label><select id="listing-status"><option value="available">Available / Published</option><option value="rented">Rented / Hidden</option></select></div>
-              <div class="field"><label for="listing-photos">Property photos</label><input id="listing-photos" type="file" accept="image/*" multiple><span class="field-help">Up to 10 MB per image. Photos are added to existing photos when editing.</span><div id="listing-photo-preview" class="photo-preview" aria-live="polite"></div></div>
+              <div class="field"><label for="listing-status">Listing status</label><select id="listing-status"><option value="available">Available / Published</option><option value="booked">Booked / Hidden</option><option value="rented">Rented / Hidden</option></select></div>
+              <div class="field"><label for="listing-photos">Property photos</label><input id="listing-photos" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple><span class="field-help">JPG, PNG, or WebP only. Up to 5 MB per image. Photos are added to existing photos when editing.</span><div id="listing-photo-preview" class="photo-preview" aria-live="polite"></div></div>
               <div class="field field-full"><label for="listing-description">Description</label><textarea id="listing-description" rows="4" placeholder="Describe the property, amenities, and requirements."></textarea></div>
             </div>
             <label class="featured-option" for="listing-featured"><input id="listing-featured" type="checkbox"><span><strong>Feature this property</strong><small>Show it in the featured section on the homepage.</small></span></label>
@@ -155,6 +166,16 @@
             <a class="text-action" href="#listing-editor">＋ Add property</a>
           </div>
           <div class="admin-listings" id="admin-listings"><p class="empty-state">Your listings will appear here after sign in.</p></div>
+        </section>
+        <section class="panel listings-panel" id="booking-management" aria-labelledby="bookings-heading">
+          <div class="panel-heading">
+            <div>
+              <div class="section-kicker">INQUIRIES</div>
+              <h2 id="bookings-heading">Property bookings</h2>
+            </div>
+            <button class="button button-secondary" id="admin-refresh-bookings" type="button">Refresh bookings</button>
+          </div>
+          <div class="admin-listings" id="admin-bookings"><p class="empty-state">Booking requests will appear here.</p></div>
         </section>
         <footer class="admin-footer">© <span data-year></span> J Star Property Management <span>·</span> Admin workspace</footer>
       </div>

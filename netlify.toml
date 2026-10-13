@@ -1,6 +1,9 @@
 [build]
   publish = "."
 
+[build.environment]
+  NODE_VERSION = "22"
+
 [[redirects]]
   from = "/sub-pages-html/admin.html"
   to = "/admin/"
@@ -10,3 +13,68 @@
   from = "/sub-pages-html/:page"
   to = "/pages/:page"
   status = 301
+
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/pages/about.html"
+  to = "/about"
+  status = 301
+
+[[redirects]]
+  from = "/pages/apply.html"
+  to = "/apply"
+  status = 301
+
+[[redirects]]
+  from = "/pages/contact.html"
+  to = "/contact"
+  status = 301
+
+[[redirects]]
+  from = "/pages/owners.html"
+  to = "/owners"
+  status = 301
+
+[[redirects]]
+  from = "/pages/properties.html"
+  to = "/properties"
+  status = 301
+
+[[redirects]]
+  from = "/pages/residents.html"
+  to = "/residents"
+  status = 301
+
+[[redirects]]
+  from = "/about"
+  to = "/pages/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/apply"
+  to = "/pages/apply.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/pages/contact.html"
+  status = 200
+
+[[redirects]]
+  from = "/owners"
+  to = "/pages/owners.html"
+  status = 200
+
+[[redirects]]
+  from = "/properties"
+  to = "/pages/properties.html"
+  status = 200
+
+[[redirects]]
+  from = "/residents"
+  to = "/pages/residents.html"
+  status = 200

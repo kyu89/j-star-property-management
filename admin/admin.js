@@ -1,26 +1,31 @@
 import { auth, db } from "../assets/js/firebase.js";
 import {
-  collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
+  collection, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, doc,
   query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 import {
-  onAuthStateChanged, signInWithEmailAndPassword, signOut
+  onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, signOut
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 import { JSTAR, $, esc, money, beds, photosOf, firstPhoto } from "../assets/js/site.js";
 import { showToast } from "../assets/js/toast.js";
 
+function validateImageFiles(files) {
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  const invalidFile = files.find(file => !allowedTypes.includes(file.type));
+  if (invalidFile) throw new Error(`${invalidFile.name} must be a JPG, PNG, or WebP image.`);
+}
+
 async function uploadImages(files) {
+  validateImageFiles(files);
   const urls = [];
   for (const file of files) {
-    if (!file.type.startsWith("image/")) throw new Error(`${file.name} is not an image file.`);
-    if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name} is over the 10 MB limit.`);
+    if (file.size > 5 * 1024 * 1024) throw new Error(`${file.name} must be 5 MB or smaller.`);
     const data = new FormData();
     data.append("file", file);
     data.append("upload_preset", JSTAR.uploadPreset);
-    data.append("folder", "jstar-properties");
     const response = await fetch(`https://api.cloudinary.com/v1_1/${JSTAR.cloudName}/image/upload`, { method: "POST", body: data });
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error?.message || `Upload failed for ${file.name}.`);
+    if (!response.ok) throw new Error(result.error?.message || "Image upload failed.");
     urls.push(result.secure_url);
   }
   return urls;
@@ -61,17 +66,66 @@ function initAdmin() {
     $("#listing-photo-preview").innerHTML = "";
   };
   let adminListings = [];
+  let adminBookings = [];
+  let unsubscribeListings;
+  const renderBookings = () => {
+    const container = $("#admin-bookings");
+    if (!container) return;
+    container.innerHTML = adminBookings.map(booking => {
+      const submittedAt = booking.createdAt ? new Date(booking.createdAt).toLocaleString() : "Date unavailable";
+      return `<article class="listing-card booking-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(booking.name)}</strong><span class="listing-badge booked">BOOKED</span></div><p><strong>${esc(booking.address)}</strong></p><p>${esc(booking.email)} · ${esc(booking.phone)}</p><p class="meta">Requested ${esc(submittedAt)} · ${Number(booking.occupants)} occupant(s)${booking.moveInDate ? ` · Move-in ${esc(booking.moveInDate)}` : ""}</p>${booking.message ? `<p class="booking-message">${esc(booking.message)}</p>` : ""}</article>`;
+    }).join("") || '<p class="empty-state">No bookings yet.</p>';
+  };
+  const loadBookings = async () => {
+    const container = $("#admin-bookings");
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      const token = await user.getIdToken();
+      const response = await fetch("/.netlify/functions/admin-bookings", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not load bookings.");
+      if (auth.currentUser !== user) return;
+      adminBookings = result.bookings;
+      renderBookings();
+    } catch (err) {
+      console.error("Could not load admin bookings:", err);
+      if (container) container.innerHTML = '<p class="empty-state">Could not load bookings. Check the Netlify function configuration and admin account settings.</p>';
+    }
+  };
   const render = () => {
     $("#admin-total-count").textContent = String(adminListings.length);
-    $("#admin-available-count").textContent = String(adminListings.filter(l => l.status !== "rented" && l.published !== false).length);
-    $("#admin-rented-count").textContent = String(adminListings.filter(l => l.status === "rented" || l.published === false).length);
+    $("#admin-available-count").textContent = String(adminListings.filter(l => l.status === "available" && l.published !== false).length);
+    $("#admin-booked-count").textContent = String(adminListings.filter(l => l.status === "booked").length);
+    $("#admin-rented-count").textContent = String(adminListings.filter(l => l.status === "rented" || (l.published === false && l.status !== "booked")).length);
     $("#admin-listings").innerHTML = adminListings.map(l => {
       const photo = firstPhoto(l);
-      const rented = l.status === "rented" || l.published === false;
-      return `<article class="listing-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(l.address)}</strong><span class="listing-badge${rented ? " rented" : ""}">${rented ? "RENTED" : "AVAILABLE"}</span></div>${photo ? `<img class="listing-card-photo" src="${esc(photo)}" alt="">` : ""}<p>${esc(l.city)}, ${esc(l.state || "PA")} · <strong>${money(l.rent)}/mo</strong></p><p class="meta">${esc(l.type)} · ${esc(beds(l))}</p><div class="listing-card-actions"><button class="button button-secondary" data-edit="${esc(l.id)}" type="button">Edit</button><button class="button delete-button" data-delete="${esc(l.id)}" type="button">Delete</button></div></article>`;
+      const booked = l.status === "booked";
+      const unavailable = l.status === "rented" || (l.published === false && !booked);
+      const statusLabel = booked ? "BOOKED" : unavailable ? "RENTED" : "AVAILABLE";
+      return `<article class="listing-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(l.address)}</strong><span class="listing-badge${booked ? " booked" : unavailable ? " rented" : ""}">${statusLabel}</span></div>${photo ? `<img class="listing-card-photo" src="${esc(photo)}" alt="">` : ""}<p>${esc(l.city)}, ${esc(l.state || "PA")} · <strong>${money(l.rent)}/mo</strong></p><p class="meta">${esc(l.type)} · ${esc(beds(l))}</p><div class="listing-card-actions"><button class="button button-secondary" data-edit="${esc(l.id)}" type="button">Edit</button><button class="button delete-button" data-delete="${esc(l.id)}" type="button">Delete</button></div></article>`;
     }).join("") || '<p class="empty-state">No listings yet. Add your first property above.</p>';
   };
-  const load = async () => { adminListings = await getAllAdminListings(); render(); };
+  const watchListings = () => {
+    unsubscribeListings?.();
+    unsubscribeListings = onSnapshot(
+      query(collection(db, JSTAR.collection), orderBy("createdAt", "desc")),
+      snapshot => {
+        adminListings = snapshot.docs.map(document => ({ id: document.id, ...document.data() }));
+        render();
+      },
+      err => {
+        console.error("Could not watch admin listings:", err);
+        const message = "Could not refresh listings. Check Firestore rules for this administrator.";
+        setAdminMessage(message, true);
+        showToast(message, "error");
+      }
+    );
+  };
+  const load = async () => { adminListings = await getAllAdminListings(); render(); await loadBookings(); };
+  $("#admin-refresh-bookings")?.addEventListener("click", loadBookings);
   loginForm?.addEventListener("submit", async e => {
     e.preventDefault();
     const btn = $('button[type="submit"]', loginForm);
@@ -86,6 +140,27 @@ function initAdmin() {
       showToast(message, "error");
     } finally { btn.disabled = false; }
   });
+  $("#admin-forgot-password")?.addEventListener("click", async () => {
+    const emailInput = $("#admin-email");
+    emailInput.value = emailInput.value.trim();
+    if (!emailInput.reportValidity()) return;
+
+    const button = $("#admin-forgot-password");
+    const messageEl = $("#admin-login-error");
+    button.disabled = true;
+    messageEl.textContent = "";
+    try {
+      await sendPasswordResetEmail(auth, emailInput.value);
+      const message = "If an admin account exists for this email, a password reset link will be sent.";
+      messageEl.textContent = message;
+      showToast(message);
+    } catch (err) {
+      console.error("Could not send password reset email:", err);
+      const message = "Could not send a password reset email. Check the email address and Firebase Authentication settings, then try again.";
+      messageEl.textContent = message;
+      showToast(message, "error");
+    } finally { button.disabled = false; }
+  });
   $("#admin-logout")?.addEventListener("click", async () => {
     try {
       await signOut(auth);
@@ -96,9 +171,17 @@ function initAdmin() {
     }
   });
   onAuthStateChanged(auth, async user => {
+    unsubscribeListings?.();
+    unsubscribeListings = null;
     setSignedIn(user);
-    if (!user) { adminListings = []; if ($("#admin-listings")) $("#admin-listings").innerHTML = ""; return; }
-    try { await load(); }
+    if (!user) {
+      adminListings = [];
+      adminBookings = [];
+      if ($("#admin-listings")) $("#admin-listings").innerHTML = "";
+      if ($("#admin-bookings")) $("#admin-bookings").innerHTML = "";
+      return;
+    }
+    try { await load(); watchListings(); }
     catch (err) {
       console.error(err);
       const message = "Could not load listings. Check that your Firestore rules allow this signed-in administrator to read the properties collection.";
@@ -106,10 +189,20 @@ function initAdmin() {
       showToast(message, "error");
     }
   });
-  $("#listing-photos")?.addEventListener("change", () => {
+  $("#listing-photos")?.addEventListener("change", event => {
+    const input = event.currentTarget;
     const preview = $("#listing-photo-preview");
-    const files = [...$("#listing-photos").files];
-    preview.innerHTML = files.map(f => `<span class="meta">${esc(f.name)}</span>`).join(" · ");
+    const files = [...input.files];
+    try {
+      validateImageFiles(files);
+      setAdminMessage("");
+      preview.innerHTML = files.map(f => `<span class="meta">${esc(f.name)}</span>`).join(" · ");
+    } catch (err) {
+      input.value = "";
+      preview.textContent = "";
+      setAdminMessage(err.message, true);
+      showToast(err.message, "error");
+    }
   });
   form.addEventListener("submit", async e => {
     e.preventDefault();
