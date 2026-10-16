@@ -1,0 +1,41 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+Sitemap: https://jstarpm.com/sitemap.xml

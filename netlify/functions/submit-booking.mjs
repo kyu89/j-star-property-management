@@ -12,7 +12,8 @@ function isAllowedOrigin(origin) {
   const configuredOrigins = [
     process.env.URL,
     process.env.DEPLOY_PRIME_URL,
-    process.env.SITE_ORIGIN
+    process.env.SITE_ORIGIN,
+    "https://jstarpm.com"
   ].filter(Boolean).map(value => new URL(value).origin);
   if (process.env.CONTEXT === "dev") {
     configuredOrigins.push("http://localhost:8888", "http://127.0.0.1:8888");

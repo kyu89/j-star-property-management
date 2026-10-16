@@ -1,0 +1,22 @@
+# J Star Property Management
+
+> J Star Property Management LLC provides residential and commercial property management in the Reading area and surrounding Berks County, Pennsylvania.
+
+Canonical website: https://jstarpm.com/
+Based in: 2317 Perkiomen Avenue, Mount Penn, PA 19606
+Phone: (484) 866-9728
+Email: invoicejstarpm@gmail.com
+
+## Public pages
+
+- [Home](https://jstarpm.com/): Property management for owners and residents in Berks County.
+- [Available properties](https://jstarpm.com/properties): Rental homes, apartments, and commercial spaces.
+- [Owner services](https://jstarpm.com/owners): Property marketing and leasing, tenant screening and placement, rent collection, maintenance coordination, financial reporting, and inspections.
+- [Resident resources](https://jstarpm.com/residents): Rental payment information, maintenance requests, and resident contact details.
+- [About J Star](https://jstarpm.com/about): Company background, service approach, and service area.
+- [Rental application](https://jstarpm.com/apply): Select an available property and prepare an application email.
+- [Contact](https://jstarpm.com/contact): Contact J Star about property management and resident services.
+
+## Service area
+
+Reading, Mount Penn, and surrounding Berks County, Pennsylvania.

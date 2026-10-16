@@ -32,14 +32,27 @@ export function photosOf(l) {
 }
 export function firstPhoto(l) { return photosOf(l)[0] || ""; }
 
+
 async function getPublicListings() {
-  // This query must match the public-read condition in Firestore Rules.
-  const q = query(collection(db, JSTAR.collection), where("status", "==", "available"));
+  // Fetch only available properties explicitly published for public viewing.
+  const q = query(
+    collection(db, JSTAR.collection),
+    where("status", "==", "available"),
+    where("published", "==", true)
+  );
+
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
-    .filter(l => l.published !== false)
-    .sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+
+  return snap.docs
+    .map(d => ({
+      id: d.id,
+      ...d.data()
+    }))
+    .sort(
+      (a, b) => Number(!!b.featured) - Number(!!a.featured)
+    );
 }
+
 async function refreshPublicListings() {
   try {
     cachedListings = await getPublicListings();

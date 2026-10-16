@@ -17,6 +17,13 @@ move-in date, and optional weekly viewing days and hours. Existing listings
 that only have a single `rent` value continue to display and can be edited.
 
 Legacy `/sub-pages-html/` URLs redirect to their new locations.
+The canonical public domain is `https://jstarpm.com`; Netlify redirects the
+`www` hostname to the apex domain. Keep the sitemap and canonical URLs in sync
+if the primary domain changes.
+Public pages include page-specific search and social metadata with structured
+data. `robots.txt`, `sitemap.xml`, and `llms.txt` provide crawler and AI
+discovery guidance; they do not guarantee inclusion or ranking by search or AI
+services.
 
 Run the static site from the repository root with VS Code Live Server. Booking
 submissions use Netlify Functions, so test those through `netlify dev` or a

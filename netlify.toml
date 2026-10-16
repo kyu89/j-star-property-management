@@ -6,6 +6,12 @@
   AWS_LAMBDA_JS_RUNTIME = "nodejs22.x"
 
 [[redirects]]
+  from = "https://www.jstarpm.com/*"
+  to = "https://jstarpm.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/sub-pages-html/admin.html"
   to = "/admin/"
   status = 301
