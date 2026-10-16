@@ -5,7 +5,7 @@ import { bindFormValidationToasts, showToast } from "./toast.js";
 "use strict";
 
 export const JSTAR = {
-  email: "punyeramina@gmail.com",
+  email: "invoicejstarpm@gmail.com",
   phone: "(484) 866-9728",
   address: "2317 Perkiomen Avenue, Mount Penn, PA 19606",
   collection: "properties",

@@ -82,76 +82,7 @@ function initAdmin() {
     renderPhotoPreview();
   };
   let adminListings = [];
-  let adminBookings = [];
   let unsubscribeListings;
-  const renderBookings = () => {
-    const container = $("#admin-bookings");
-    if (!container) return;
-    container.innerHTML = adminBookings.map(booking => {
-      const submittedAt = booking.createdAt ? new Date(booking.createdAt).toLocaleString() : "Date unavailable";
-      const approved = booking.status === "approved" || booking.status === "booked";
-      const statusClass = approved ? "booked" : "pending";
-      const statusLabel = approved ? "APPROVED" : "PENDING";
-      const approveButton = approved ? "" : `<div class="listing-card-actions"><button class="button button-primary" data-approve="${esc(booking.id)}" type="button">Approve booking</button></div>`;
-      return `<article class="listing-card booking-card"><div class="row" style="justify-content:space-between"><strong class="listing-card-title">${esc(booking.name)}</strong><span class="listing-badge ${statusClass}">${statusLabel}</span></div><p><strong>${esc(booking.address)}</strong></p><p>${esc(booking.email)} · ${esc(booking.phone)}</p><p class="meta">Requested ${esc(submittedAt)} · ${Number(booking.occupants)} occupant(s)${booking.moveInDate ? ` · Move-in ${esc(booking.moveInDate)}` : ""}</p>${booking.message ? `<p class="booking-message">${esc(booking.message)}</p>` : ""}${approveButton}</article>`;
-    }).join("") || '<p class="empty-state">No bookings yet.</p>';
-  };
-  const loadBookings = async () => {
-    const container = $("#admin-bookings");
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
-      const token = await user.getIdToken();
-      const response = await fetch("/.netlify/functions/admin-bookings", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const responseText = await response.text();
-      let result = {};
-      try {
-        result = responseText ? JSON.parse(responseText) : {};
-      } catch {
-        result = {};
-      }
-      if (!response.ok) {
-        throw new Error(result.error || `Netlify returned HTTP ${response.status}.`);
-      }
-      if (auth.currentUser !== user) return;
-      adminBookings = result.bookings;
-      renderBookings();
-    } catch (err) {
-      console.error("Could not load admin bookings:", err);
-      if (container) container.innerHTML = `<p class="empty-state booking-error">Could not load booking inquiries. Check the deployed Netlify admin-bookings function and admin authentication. ${esc(err.message || "Request failed.")} Use Refresh bookings to retry.</p>`;
-    }
-  };
-  $("#admin-bookings")?.addEventListener("click", async event => {
-    const button = event.target.closest("[data-approve]");
-    if (!button) return;
-    const user = auth.currentUser;
-    if (!user) {
-      showToast("Please sign in first.", "error");
-      return;
-    }
-    button.disabled = true;
-    try {
-      const token = await user.getIdToken();
-      const response = await fetch("/.netlify/functions/admin-bookings", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ action: "approve", bookingId: button.dataset.approve })
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Could not approve this booking.");
-      await loadBookings();
-      showToast("Booking approved. The property is now marked booked.");
-    } catch (error) {
-      console.error("Could not approve booking:", error);
-      showToast(error.message || "Could not approve this booking. Please try again.", "error");
-      button.disabled = false;
-    }
-  });
   const render = () => {
     $("#admin-total-count").textContent = String(adminListings.length);
     const availableListings = adminListings.filter(l => l.status === "available" && l.published !== false);
@@ -191,8 +122,7 @@ function initAdmin() {
       }
     );
   };
-  const load = async () => { adminListings = await getAllAdminListings(); render(); await loadBookings(); };
-  $("#admin-refresh-bookings")?.addEventListener("click", loadBookings);
+  const load = async () => { adminListings = await getAllAdminListings(); render(); };
   loginForm?.addEventListener("submit", async e => {
     e.preventDefault();
     const btn = $('button[type="submit"]', loginForm);
@@ -243,9 +173,8 @@ function initAdmin() {
     setSignedIn(user);
     if (!user) {
       adminListings = [];
-      adminBookings = [];
       if ($("#admin-listings")) $("#admin-listings").innerHTML = "";
-      if ($("#admin-bookings")) $("#admin-bookings").innerHTML = "";
+      if ($("#admin-unavailable-listings")) $("#admin-unavailable-listings").innerHTML = "";
       return;
     }
     try { await load(); watchListings(); }

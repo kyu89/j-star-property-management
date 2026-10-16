@@ -1,4 +1,5 @@
 import { FieldValue } from "firebase-admin/firestore";
+import { getAdminEmails } from "../lib/admin-emails.mjs";
 import { getFirebaseAdmin, jsonResponse } from "../lib/firebase-admin.mjs";
 
 const maxBodyLength = 12_000;
@@ -43,9 +44,9 @@ function isRateLimited(ipAddress) {
 export default async request => {
   if (request.method !== "POST") return jsonResponse(405, { error: "Method not allowed." });
   if (!isAllowedOrigin(request.headers.get("origin"))) return jsonResponse(403, { error: "Request origin is not allowed." });
-  const adminEmail = process.env.ADMIN_EMAIL?.trim();
+  const adminEmails = getAdminEmails();
   const fromEmail = process.env.RESEND_FROM_EMAIL?.trim();
-  if (!adminEmail || !process.env.RESEND_API_KEY || !fromEmail) {
+  if (!adminEmails.length || !process.env.RESEND_API_KEY || !fromEmail) {
     console.error("Booking email configuration is incomplete.");
     return jsonResponse(503, { error: "Booking is temporarily unavailable. Please contact J Star directly." });
   }
@@ -126,7 +127,7 @@ export default async request => {
         },
         body: JSON.stringify({
           from: fromEmail,
-          to: [adminEmail],
+          to: adminEmails,
           reply_to: email,
           subject: `New property booking: ${String(property.address || "Property").replace(/[\r\n]/g, " ").slice(0, 120)}`,
           text: [

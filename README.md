@@ -27,19 +27,20 @@ Netlify deploy rather than Live Server alone.
 Visitors can submit a booking request from a property card. The Netlify
 `submit-booking` function records the applicant details with a pending status
 in the Firestore `bookings` collection and sends an email notification through
-Resend. The property remains available until an admin approves the request.
-Signed-in admins can review recent bookings in the admin dashboard; only the
-email configured as `ADMIN_EMAIL` can retrieve or approve those records
-through the admin function. Approval atomically marks the booking approved and
-the property booked and unpublished.
+Resend. Booking requests are sent to the configured admin email and are no
+longer displayed in the admin dashboard. Admins manage availability directly
+from the property status editor; setting a property to booked or rented hides
+it from the public listings.
 
 Configure these environment variables in Netlify before enabling bookings:
 
 - `FIREBASE_SERVICE_ACCOUNT_JSON` — the JSON contents of a Firebase service
   account with access to the project's Firestore database. Store it only in
   Netlify environment variables; never commit it to the repository.
-- `ADMIN_EMAIL` — the administrator's Firebase Authentication email and the
-  destination for booking notifications.
+- `ADMIN_EMAILS` — optional comma-separated Firebase Authentication email
+  addresses that receive booking notifications and are authorized by the
+  admin-bookings function. `ADMIN_EMAIL` is also supported for a single admin.
+  If neither is set, `invoicejstarpm@gmail.com` is used.
 - `RESEND_API_KEY` — the Resend API key used to send booking notifications.
 - `RESEND_FROM_EMAIL` — a sender address verified with Resend, such as
   `Bookings <bookings@your-verified-domain.com>`.

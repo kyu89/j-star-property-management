@@ -1,15 +1,16 @@
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue } from "firebase-admin/firestore";
+import { getAdminEmails } from "../lib/admin-emails.mjs";
 import { getFirebaseAdmin, jsonResponse } from "../lib/firebase-admin.mjs";
 
 export default async request => {
   if (request.method !== "GET" && request.method !== "POST") {
     return jsonResponse(405, { error: "Method not allowed." });
   }
-  const expectedAdminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const expectedAdminEmails = getAdminEmails();
   const authorization = request.headers.get("authorization") || "";
   const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
-  if (!expectedAdminEmail || !token) return jsonResponse(401, { error: "Admin authentication is required." });
+  if (!expectedAdminEmails.length || !token) return jsonResponse(401, { error: "Admin authentication is required." });
 
   let app;
   let db;
@@ -27,7 +28,7 @@ export default async request => {
     console.error("Could not authenticate admin booking request:", error);
     return jsonResponse(401, { error: "Could not authenticate this admin request." });
   }
-  if (decodedToken.email?.toLowerCase() !== expectedAdminEmail) {
+  if (!expectedAdminEmails.includes(decodedToken.email?.toLowerCase())) {
     return jsonResponse(403, { error: "This account is not authorized to view bookings." });
   }
 
