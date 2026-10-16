@@ -63,6 +63,7 @@
       <div class="sidebar-label">WORKSPACE</div>
       <nav class="sidebar-nav" aria-label="Admin navigation">
         <a class="sidebar-link active" href="#dashboard"><span class="nav-icon">▦</span>Overview</a>
+        <a class="sidebar-link" href="#booking-management"><span class="nav-icon">▣</span>Bookings</a>
         <a class="sidebar-link" href="#listing-editor"><span class="nav-icon">＋</span>Add a property</a>
         <a class="sidebar-link" href="#listing-management"><span class="nav-icon">▤</span>All listings</a>
       </nav>
@@ -117,6 +118,18 @@
             <strong class="metric-value" id="admin-rented-count">0</strong>
             <span class="metric-note">Not shown to visitors</span>
           </article>
+        </section>
+
+        <section class="panel bookings-panel" id="booking-management" aria-labelledby="bookings-heading">
+          <div class="panel-heading">
+            <div>
+              <div class="section-kicker">RENTER REQUESTS</div>
+              <h2 id="bookings-heading">Pending bookings <span class="booking-count" id="admin-pending-count">0</span></h2>
+            </div>
+            <button class="button button-secondary" id="admin-bookings-refresh" type="button">Refresh</button>
+          </div>
+          <p class="booking-status" id="admin-bookings-status" role="status">Pending booking requests will appear here after sign in.</p>
+          <div class="booking-list" id="admin-bookings-list" aria-live="polite"></div>
         </section>
 
         <section class="panel" id="listing-editor" aria-labelledby="admin-form-title">

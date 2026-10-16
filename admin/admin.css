@@ -241,7 +241,25 @@ button, input, select, textarea { font-size: inherit; }
 .form-feedback.ok { color: var(--admin-green); }
 .form-actions { display: flex; gap: 8px; padding-top: 13px; margin-top: 12px; border-top: 1px solid var(--admin-divider); }
 .text-action { color: var(--admin-blue); font-size: 11px; font-weight: 750; }
-#listing-editor, .listings-panel { scroll-margin-top: 18px; }
+#listing-editor, .listings-panel, .bookings-panel { scroll-margin-top: 18px; }
+.booking-count { display: inline-grid; min-width: 24px; min-height: 24px; place-items: center; margin-left: 5px; padding: 0 7px; border-radius: 20px; background: var(--admin-subtle); color: var(--admin-muted); font-size: 11px; vertical-align: 2px; }
+.booking-status { margin: 14px 0 0; color: var(--admin-muted); font-size: 11px; }
+.booking-status:empty { display: none; }
+.booking-status.err { color: #ba3030; }
+.booking-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-top: 14px; }
+.booking-card { min-width: 0; padding: 15px; border: 1px solid var(--admin-border); border-radius: 8px; background: var(--admin-panel); }
+.booking-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.booking-card-heading > div { display: grid; gap: 3px; min-width: 0; }
+.booking-card-heading strong { overflow-wrap: anywhere; font-size: 12px; }
+.booking-meta { color: var(--admin-muted); font-size: 10px; }
+.booking-badge { flex: 0 0 auto; padding: 3px 7px; border-radius: 20px; background: #fff1d6; color: #8a5a00; font-size: 8px; font-weight: 800; letter-spacing: .06em; }
+.booking-details { padding-top: 8px; }
+.booking-details p { margin: 5px 0; font-size: 10px; overflow-wrap: anywhere; }
+.booking-details p > strong { color: var(--admin-muted); }
+.booking-details a { color: var(--admin-blue); text-decoration: underline; }
+.booking-message { white-space: pre-wrap; }
+.booking-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.booking-actions .button { min-height: 32px; padding: 6px 10px; font-size: 10px; }
 .admin-listings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-top: 17px; }
 .listing-card { min-width: 0; padding: 14px; border: 1px solid var(--admin-border); border-radius: 8px; background: var(--admin-panel); }
 .listing-card .row { display: flex; align-items: center; gap: 8px; }
@@ -262,6 +280,7 @@ button, input, select, textarea { font-size: inherit; }
 @media (max-width: 1050px) {
   .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-listings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .booking-list { grid-template-columns: 1fr; }
   .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 900px) {

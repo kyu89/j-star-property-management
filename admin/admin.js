@@ -83,6 +83,63 @@ function initAdmin() {
   };
   let adminListings = [];
   let unsubscribeListings;
+  let adminBookings = [];
+  const bookingStatus = $("#admin-bookings-status");
+  const bookingList = $("#admin-bookings-list");
+  const renderBookings = () => {
+    const pendingBookings = adminBookings.filter(booking => booking.status === "pending");
+    $("#admin-pending-count").textContent = String(pendingBookings.length);
+    if (!bookingList) return;
+    bookingList.innerHTML = pendingBookings.map(booking => {
+      const location = [booking.city, booking.state, booking.zip].filter(Boolean).join(", ");
+      const submittedAt = booking.createdAt && !Number.isNaN(Date.parse(booking.createdAt))
+        ? new Date(booking.createdAt).toLocaleString()
+        : "Date unavailable";
+      return `<article class="booking-card" data-booking-card="${esc(booking.id)}">
+        <div class="booking-card-heading">
+          <div><strong>${esc(booking.address || "Property booking")}</strong><span class="booking-meta">${esc(location)} · Submitted ${esc(submittedAt)}</span></div>
+          <span class="booking-badge">PENDING</span>
+        </div>
+        <div class="booking-details">
+          <p><strong>Applicant:</strong> ${esc(booking.name || "Not provided")}</p>
+          <p><strong>Email:</strong> <a href="mailto:${encodeURIComponent(booking.email || "")}">${esc(booking.email || "Not provided")}</a></p>
+          <p><strong>Phone:</strong> ${esc(booking.phone || "Not provided")}</p>
+          <p><strong>Move-in:</strong> ${esc(booking.moveInDate || "Not provided")} · <strong>Occupants:</strong> ${esc(booking.occupants ?? "Not provided")}</p>
+          <p class="booking-message"><strong>Message:</strong> ${esc(booking.message || "No message provided.")}</p>
+        </div>
+        <div class="booking-actions">
+          <button class="button button-primary" data-booking-action="approve" data-booking-id="${esc(booking.id)}" type="button">Approve &amp; mark booked</button>
+          <button class="button button-secondary" data-booking-action="deny" data-booking-id="${esc(booking.id)}" type="button">Deny &amp; keep available</button>
+        </div>
+      </article>`;
+    }).join("");
+    if (!pendingBookings.length) {
+      bookingStatus.textContent = "There are no pending booking requests.";
+    } else {
+      bookingStatus.textContent = "";
+    }
+  };
+  const loadBookings = async () => {
+    if (!auth.currentUser) return;
+    bookingStatus.textContent = "Loading pending booking requests…";
+    bookingStatus.classList.remove("err");
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch("/.netlify/functions/admin-bookings", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || `Could not load booking requests (${response.status}).`);
+      adminBookings = Array.isArray(result.bookings) ? result.bookings : [];
+      renderBookings();
+    } catch (error) {
+      console.error("Could not load pending booking requests:", error);
+      bookingList.innerHTML = "";
+      $("#admin-pending-count").textContent = "—";
+      bookingStatus.textContent = error.message || "Could not load booking requests.";
+      bookingStatus.classList.add("err");
+    }
+  };
   const render = () => {
     $("#admin-total-count").textContent = String(adminListings.length);
     const availableListings = adminListings.filter(l => l.status === "available" && l.published !== false);
@@ -167,16 +224,55 @@ function initAdmin() {
       showToast("Could not sign out. Please try again.", "error");
     }
   });
+  $("#admin-bookings-refresh")?.addEventListener("click", loadBookings);
+  bookingList?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-booking-action]");
+    if (!button || button.disabled) return;
+    const action = button.dataset.bookingAction;
+    const card = button.closest("[data-booking-card]");
+    const actionButtons = $$("[data-booking-action]", card);
+    actionButtons.forEach(actionButton => { actionButton.disabled = true; });
+    bookingStatus.textContent = action === "approve" ? "Approving booking…" : "Denying booking…";
+    bookingStatus.classList.remove("err");
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch("/.netlify/functions/admin-bookings", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ action, bookingId: button.dataset.bookingId })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || `Could not ${action} this booking (${response.status}).`);
+      await loadBookings();
+      showToast(action === "approve"
+        ? "Booking approved. The property is now booked and hidden."
+        : "Booking denied. The property is available again.");
+    } catch (error) {
+      console.error(`Could not ${action} booking:`, error);
+      bookingStatus.textContent = error.message || `Could not ${action} this booking.`;
+      bookingStatus.classList.add("err");
+      actionButtons.forEach(actionButton => { actionButton.disabled = false; });
+      showToast(error.message || `Could not ${action} this booking.`, "error");
+    }
+  });
   onAuthStateChanged(auth, async user => {
     unsubscribeListings?.();
     unsubscribeListings = null;
     setSignedIn(user);
     if (!user) {
       adminListings = [];
+      adminBookings = [];
       if ($("#admin-listings")) $("#admin-listings").innerHTML = "";
       if ($("#admin-unavailable-listings")) $("#admin-unavailable-listings").innerHTML = "";
+      if (bookingList) bookingList.innerHTML = "";
+      if (bookingStatus) bookingStatus.textContent = "Pending booking requests will appear here after sign in.";
+      if ($("#admin-pending-count")) $("#admin-pending-count").textContent = "0";
       return;
     }
+    loadBookings();
     try { await load(); watchListings(); }
     catch (err) {
       console.error(err);

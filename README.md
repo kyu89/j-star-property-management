@@ -34,10 +34,10 @@ Netlify deploy rather than Live Server alone.
 Visitors can submit a booking request from a property card. The Netlify
 `submit-booking` function records the applicant details with a pending status
 in the Firestore `bookings` collection and sends an email notification through
-Resend. Booking requests are sent to the configured admin email and are no
-longer displayed in the admin dashboard. Admins manage availability directly
-from the property status editor; setting a property to booked or rented hides
-it from the public listings.
+Resend. Authorized admins can review pending requests in the admin dashboard.
+Approving a request marks the booking approved and the property booked and
+hidden from public listings. Denying a request marks it denied and returns its
+property to available when it has not since been booked or rented separately.
 
 Configure these environment variables in Netlify before enabling bookings:
 
