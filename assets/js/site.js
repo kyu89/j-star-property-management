@@ -130,6 +130,9 @@ function matchesSearch(listing, { query: searchQuery, type, beds: bedroomCount, 
 function applyTheme(theme) {
   const dark = theme === "dark";
   document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  $$("[data-theme-logo]").forEach(logo => {
+    logo.src = dark ? logo.dataset.darkSrc : logo.dataset.lightSrc;
+  });
   $$("#themeToggle, [data-admin-theme-toggle]").forEach(t => {
     const icon = $(".theme-toggle__icon i", t);
     icon.classList.toggle("fa-lightbulb", dark);
