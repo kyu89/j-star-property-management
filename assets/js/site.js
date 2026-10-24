@@ -58,12 +58,10 @@ async function refreshPublicListings() {
     cachedListings = await getPublicListings();
     listingsReady = true;
     renderListings();
-    window.jstarOnListingsLoaded?.(true);
   } catch (err) {
     console.error("Could not load public property listings:", err);
     const target = $("#featured-listings") || $("#property-listings");
     if (target) target.innerHTML = '<div class="card"><p>Property listings could not be loaded right now. Please try again later or <a href="/pages/contact.html">contact us</a>.</p></div>';
-    window.jstarOnListingsLoaded?.(false);
   }
 }
 function activeListings() {
@@ -276,7 +274,7 @@ function openDetails(id, focusBooking = false) {
 }
 function initListings() {
   const type = $("#home-type") || $("#property-type");
-  const hasListingSurface = $("#featured-listings") || $("#property-listings") || $("#application-property");
+  const hasListingSurface = $("#featured-listings") || $("#property-listings");
   if (!hasListingSurface) return;
   if (type) type.innerHTML = '<option value="">Any type</option>' + JSTAR.types.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join("");
   refreshPublicListings();
@@ -335,24 +333,13 @@ function initMailForms() {
   }));
 }
 function initApplication() {
-  const select = $("#application-property"), form = $("#application-form");
-  if (!select || !form) return;
-  const populate = listingsLoaded => {
-    if (!listingsLoaded) {
-      select.innerHTML = '<option value="">Could not load properties</option><option value="not-sure">Not sure yet</option>';
-      return;
-    }
-    const listings = activeListings(), id = new URLSearchParams(location.search).get("property");
-    select.innerHTML = '<option value="">Select a property</option><option value="not-sure">Not sure yet</option>' + listings.map(l => `<option value="${esc(l.id)}">${esc(l.address)} — ${esc(l.city)} (${rentRange(l)}/mo)</option>`).join("");
-    if (id && listings.some(l => l.id === id)) select.value = id;
-    else if (!listings.length) select.value = "not-sure";
-  };
-  window.jstarOnListingsLoaded = populate;
-  if (listingsReady) populate(true);
+  const propertyInput = $("#application-property"), form = $("#application-form");
+  if (!propertyInput || !form) return;
+  propertyInput.value = new URLSearchParams(location.search).get("property") || "";
   form.addEventListener("submit", e => {
     e.preventDefault(); if (!form.reportValidity()) return;
-    const d = Object.fromEntries(new FormData(form).entries()), l = activeListings().find(x => x.id === select.value);
-    const property = l ? `${l.address}, ${l.city}, ${l.state || "PA"}` : "Not sure yet";
+    const d = Object.fromEntries(new FormData(form).entries());
+    const property = propertyInput.value.trim() || "Not sure yet";
     const subject = `Rental application: ${property} - ${d.first} ${d.last}`;
     const body = formatEmailBody("Rental Application", [
       ["Property", property],

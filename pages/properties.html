@@ -63,53 +63,22 @@
 <section class="hero"><div class="wrap"><div class="eyebrow">Find your next space</div><h1>Available properties</h1><p>Explore homes, apartments and commercial spaces managed by J Star Property Management.</p></div></section>
 <section>
   <div class="wrap">
-    <div id="property-search" class="search">
-      <div class="row">
-        <div class="f">
-          <label for="property-q"><i class="fa-solid fa-location-dot"></i>Location</label>
-          <input id="property-q" placeholder="Reading PA, 19606, apartment">
-        </div>
-        <div class="f">
-          <label for="property-type"><i class="fa-solid fa-building"></i>Property type</label>
-          <select id="property-type">
-            <option value="">Any type</option>
-            <option value="Condo/Townhome">Condo/Townhome</option>
-            <option value="Multi-Family">Multi-Family</option>
-            <option value="Single-Family">Single-Family</option>
-            <option value="Industrial">Industrial</option>
-            <option value="Office">Office</option>
-            <option value="Retail">Retail</option>
-            <option value="Shopping Center">Shopping Center</option>
-            <option value="Storage">Storage</option>
-            <option value="Parking Space">Parking Space</option>
-          </select>
-        </div>
-        <div class="f">
-          <label for="property-beds"><i class="fa-solid fa-mattress-pillow"></i>Bedrooms</label>
-          <select id="property-beds">
-            <option value="">Any</option>
-            <option value="0">Studio</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4+</option>
-          </select>
-        </div>
-        <div class="f">
-          <label for="property-min"><i class="fa-solid fa-dollar-sign"></i>Min rent/month</label>
-          <input id="property-min" type="number" min="0" step="50" placeholder="Any">
-        </div>
-        <div class="f">
-          <label for="property-max"><i class="fa-solid fa-dollar-sign"></i>Max rent/month</label>
-          <input id="property-max" type="number" min="0" step="50" placeholder="Any">
-        </div>
-        <button id="property-search-btn" type="button">Search</button>
-        <button id="property-clear-btn" type="button" class="outline">Clear filters</button>
-      </div>
-      <p class="search-help">Leave any field blank to ignore that filter.</p>
+    <h2>Browse available rentals</h2>
+    <div class="appfolio-listings">
+      <script type="text/javascript" charset="utf-8">
+        document.write(unescape("%3Cscript src='" + (('https:' == document.location.protocol) ? 'https:' : 'http:') + "//jstarpm.appfolio.com/javascripts/listing.js' type='text/javascript'%3E%3C/script%3E"));
+      </script>
+      <script type="text/javascript" charset="utf-8">
+        Appfolio.Listing({
+          hostUrl: 'jstarpm.appfolio.com',
+          //propertyGroup: 'My Group Name',
+          themeColor: '#676767',
+          height: '500px',
+          width: '100%',
+          defaultOrder: 'date_posted'
+        });
+      </script>
     </div>
-    <p id="results-count" style="margin:22px 0" aria-live="polite"></p>
-    <div class="g3" id="property-listings"></div>
   </div>
 </section>
 </main>

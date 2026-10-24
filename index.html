@@ -164,53 +164,6 @@
           <a class="btn outline" href="/pages/owners.html">Owner services <i class="fa-solid fa-arrow-right-long"></i></a>
         </div>
       </div>
-          <div class="wrap">
-      <div id="home-search" class="search">
-        <div class="row">
-          <div class="f">
-            <label for="home-q"><i class="fa-solid fa-location-dot"></i>Location</label>
-            <input id="home-q" placeholder="Reading PA, 19606, apartment">
-          </div>
-
-          <div class="f">
-            <label for="home-type"><i class="fa-solid fa-building"></i>Property type</label>
-            <select id="home-type">
-              <option value="">Any type</option>
-            </select>
-          </div>
-
-          <div class="f">
-            <label for="home-beds"><i class="fa-solid fa-mattress-pillow"></i>Bedrooms</label>
-            <select id="home-beds">
-              <option value="">Any</option>
-              <option value="0">Studio</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4+</option>
-            </select>
-          </div>
-
-          <div class="f">
-            <label for="home-min-rent"><i class="fa-solid fa-dollar-sign"></i>Min rent/month</label>
-            <input id="home-min-rent" type="number" min="0" step="50" placeholder="Any">
-          </div>
-
-          <div class="f">
-            <label for="home-max-rent"><i class="fa-solid fa-dollar-sign"></i>Max rent/month</label>
-            <input id="home-max-rent" type="number" min="0" step="50" placeholder="Any">
-          </div>
-
-          <button type="button" id="home-search-btn">
-            Search rentals
-          </button>
-          <button type="button" id="home-clear-btn" class="outline">
-            Clear filters
-          </button>
-        </div>
-        <p class="search-help">Leave any field blank to ignore that filter.</p>
-      </div>
-    </div>
     </section>
 
     <section>
@@ -219,8 +172,20 @@
 
         <h2>Featured properties</h2>
 
-        <div class="g3" id="featured-listings">
-          <p>Loading listings…</p>
+        <div class="appfolio-listings">
+          <script type="text/javascript" charset="utf-8">
+            document.write(unescape("%3Cscript src='" + (('https:' == document.location.protocol) ? 'https:' : 'http:') + "//jstarpm.appfolio.com/javascripts/listing.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript" charset="utf-8">
+            Appfolio.Listing({
+              hostUrl: 'jstarpm.appfolio.com',
+              //propertyGroup: 'My Group Name',
+              themeColor: '#676767',
+              height: '500px',
+              width: '100%',
+              defaultOrder: 'date_posted'
+            });
+          </script>
         </div>
 
         <p style="margin-top: 22px">

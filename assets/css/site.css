@@ -336,6 +336,10 @@ section {
   padding: 68px 0;
 }
 
+.appfolio-listings {
+  min-height: 500px;
+}
+
 section.alt {
   background: var(--surface);
 }
